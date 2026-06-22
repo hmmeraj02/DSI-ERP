@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════
+         1. FORM VIEW
+    ══════════════════════════════════════════════════════════ -->
+    <record id="view_task_form2_inherit_dsl_study_task" model="ir.ui.view">
+        <field name="name">project.task.form.inherit.dsl.study.task</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+
+            <!-- project_id hide -->
+            <xpath expr="//group//field[@name='project_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- milestone_id hide -->
+            <xpath expr="//field[@name='milestone_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- state widget hide -->
+            <xpath expr="//field[@name='state'][@widget='project_task_state_selection']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- partner_id hide -->
+            <xpath expr="//field[@name='partner_id'][@class='o_task_customer_field']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- tag_ids hide, replace with priority_id -->
+            <xpath expr="//field[@name='tag_ids']" position="replace">
+                <field name="priority_id"
+                       string="Priority"
+                       options="{'no_create': True, 'no_open': True}"/>
+            </xpath>
+
+            <!-- contact_type + student/agent fields add (after partner_id) -->
+            <xpath expr="//field[@name='partner_id'][@class='o_task_customer_field']" position="after">
+                <field name="contact_type" widget="radio"/>
+                <field name="task_student_ids"
+                       widget="many2many_tags"
+                       string="Students"
+                       options="{'no_create_edit': True}"
+                       invisible="contact_type != 'student'"/>
+                <field name="task_agent_ids"
+                       widget="many2many_tags"
+                       string="Agents"
+                       options="{'no_create_edit': True}"
+                       invisible="contact_type != 'agent'"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════
+         2. LIST VIEW (view_task_tree2 — My Tasks / All Tasks)
+    ══════════════════════════════════════════════════════════ -->
+    <record id="view_task_tree2_inherit_dsl_study_task" model="ir.ui.view">
+        <field name="name">project.task.tree.inherit.dsl.study.task</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_tree2"/>
+        <field name="arch" type="xml">
+            <!-- tag_ids hide -->
+            <xpath expr="//field[@name='tag_ids']" position="attributes">
+                <attribute name="optional">hide</attribute>
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+            <!-- priority_id add (after tag_ids) -->
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="priority_id" string="Priority" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════
+         3. KANBAN VIEW
+    ══════════════════════════════════════════════════════════ -->
+    <record id="view_task_kanban_inherit_dsl_study_task" model="ir.ui.view">
+        <field name="name">project.task.kanban.inherit.dsl.study.task</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_kanban"/>
+        <field name="arch" type="xml">
+            <!-- kanban-এ tag_ids hide, priority_id add -->
+            <xpath expr="//field[@name='tag_ids']" position="replace">
+                <field name="priority_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- "Project" menu → "Task" rename -->
+    <record id="project.menu_main_pm" model="ir.ui.menu">
+        <field name="name">Task</field>
+    </record>
+
+</odoo>

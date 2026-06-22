@@ -1,0 +1,25 @@
+{
+    'name': 'DSL Absent Leave Deduction',
+    'version': '17.0.1.0.0',
+    'category': 'Human Resources/Attendances',
+    'summary': 'Auto deduct leave for absent employees, respecting public holidays and Saturday rotation roster',
+    'author': 'Dream Study International',
+    'depends': [
+        'hr',
+        'hr_attendance',
+        'hr_holidays',
+        'saturday_rotation_roster',
+        'auto_leave_deduction',
+    ],
+    'data': [
+        'security/ir.model.access.csv',
+        'data/ir_cron.xml',
+        'views/absent_deduction_config_views.xml',
+        'views/absent_deduction_log_views.xml',
+        'views/absent_records_attendance_menu.xml',
+        'views/menu_views.xml',
+    ],
+    'installable': True,
+    'application': False,
+    'license': 'LGPL-3',
+}

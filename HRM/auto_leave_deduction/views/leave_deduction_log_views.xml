@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_leave_deduction_log_form" model="ir.ui.view">
+        <field name="name">leave.deduction.log.form</field>
+        <field name="model">leave.deduction.log</field>
+        <field name="arch" type="xml">
+            <form string="Leave Deduction Log" create="false" edit="false" delete="false">
+                <header>
+                    <button name="action_retry"
+                        string="Retry"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state != 'failed'" />
+                    <button name="action_cancel"
+                        string="Cancel"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="state in ['cancelled', 'draft']"
+                        confirm="Are you sure you want to cancel this deduction? This will reverse the leave request." />
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <div class="alert alert-danger" role="alert"
+                        invisible="state != 'failed'">
+                        <strong>Error:</strong>
+                        <field name="error_message" readonly="1" />
+                    </div>
+
+                    <div class="alert alert-warning" role="alert"
+                        invisible="state != 'cancelled'">
+                        <strong>⚠ Cancelled:</strong> This deduction has been cancelled.
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="employee_id" readonly="1" />
+                            <field name="deduction_date" readonly="1" />
+                            <field name="deduction_type" readonly="1" />
+                        </group>
+                        <group>
+                            <field name="days_deducted" readonly="1" />
+                            <field name="leave_allocation_id" readonly="1" />
+                            <field name="leave_request_id" readonly="1" />
+                            <field name="company_id" readonly="1" />
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Related Attendances" name="attendances">
+                            <field name="attendance_ids" readonly="1">
+                                <tree create="false" edit="false" delete="false">
+                                    <field name="check_in" />
+                                    <field name="check_out" />
+                                    <field name="is_late" />
+                                    <field name="late_minutes" />
+                                    <field name="is_post_noon" />
+                                    <field name="is_early_checkout" />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" readonly="1" />
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_leave_deduction_log_tree" model="ir.ui.view">
+        <field name="name">leave.deduction.log.tree</field>
+        <field name="model">leave.deduction.log</field>
+        <field name="arch" type="xml">
+            <tree string="Leave Deduction Logs"
+                create="false"
+                edit="false"
+                delete="false"
+                decoration-danger="state == 'failed'"
+                decoration-success="state == 'processed'"
+                decoration-muted="state == 'cancelled'">
+                <field name="deduction_date" />
+                <field name="employee_id" />
+                <field name="deduction_type" />
+                <field name="days_deducted" />
+                <field name="leave_request_id" optional="hide" />
+                <field name="state" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_leave_deduction_log_search" model="ir.ui.view">
+        <field name="name">leave.deduction.log.search</field>
+        <field name="model">leave.deduction.log</field>
+        <field name="arch" type="xml">
+            <search string="Leave Deduction Logs">
+                <field name="employee_id" />
+                <field name="deduction_type" />
+                <filter string="15-Min Late" name="filter_15min_late"
+                    domain="[('deduction_type', '=', '15min_late')]" />
+                <filter string="Post-Noon" name="filter_post_noon"
+                    domain="[('deduction_type', '=', 'post_noon')]" />
+                <filter string="Early Checkout" name="filter_early_checkout"
+                    domain="[('deduction_type', '=', 'early_checkout')]" />
+                <group expand="0" string="Group By">
+                    <filter string="Employee" name="group_employee"
+                        context="{'group_by': 'employee_id'}" />
+                    <filter string="Deduction Type" name="group_type"
+                        context="{'group_by': 'deduction_type'}" />
+                    <filter string="Month" name="group_month"
+                        context="{'group_by': 'deduction_date:month'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_leave_deduction_log" model="ir.actions.act_window">
+        <field name="name">Deduction Logs</field>
+        <field name="res_model">leave.deduction.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_group_employee': 1}</field>
+    </record>
+
+    <menuitem id="menu_leave_deduction_log"
+        name="Leave Deduction Logs"
+        parent="hr_attendance.menu_hr_attendance_root"
+        action="action_leave_deduction_log"
+        sequence="35" />
+</odoo>

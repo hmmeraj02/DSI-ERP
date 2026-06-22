@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Report Action ─────────────────────────────────────────────────── -->
+    <record id="action_attendance_summary_report" model="ir.actions.report">
+        <field name="name">Attendance Summary Report</field>
+        <field name="model">attendance.summary.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">auto_leave_deduction.attendance_summary_template</field>
+        <field name="report_file">auto_leave_deduction.attendance_summary_template</field>
+        <field name="print_report_name">'Attendance Summary - %s to %s' % (object.date_from, object.date_to)</field>
+        <field name="binding_model_id" ref="base.model_res_company"/>
+        <!-- <field name="paperformat_id" ref="base.paperformat_a4_landscape"/> -->
+    </record>
+
+    <!-- ── QWeb Template ─────────────────────────────────────────────────── -->
+    <template id="attendance_summary_template">
+        <t t-call="web.html_container">
+            <style>@page { size: A4 landscape; margin: 10mm; }</style>
+            <t t-call="web.internal_layout">
+                <div class="page">
+
+                    <!-- Header -->
+                    <div class="row mb-4">
+                        <div class="col-12 text-center">
+                            <h2 style="color:#2c3e50; margin-bottom:4px;">
+                                Attendance Summary Report
+                            </h2>
+                            <p class="text-muted" style="font-size:13px;">
+                                <strong>Period:</strong>
+                                <t t-esc="date_from.strftime('%d %b %Y')"/>
+                                &amp;nbsp;—&amp;nbsp;
+                                <t t-esc="date_to.strftime('%d %b %Y')"/>
+                                &amp;nbsp;&amp;nbsp;|&amp;nbsp;&amp;nbsp;
+                                <strong>Company:</strong>
+                                <t t-esc="company.name"/>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Summary Table -->
+                    <table class="table table-sm table-bordered"
+                           style="font-size:12px; width:100%;">
+                        <thead>
+                            <tr style="background-color:#2c3e50; color:#ffffff;">
+                                <th style="width:4%;">#</th>
+                                <th style="width:16%;">Employee</th>
+                                <th style="width:11%;">Department</th>
+                                <th class="text-center" style="width:6%;">
+                                    Working Days
+                                </th>
+                                <th class="text-center" style="width:6%; color:#2ecc71;">
+                                    On-Time
+                                </th>
+                                <th class="text-center" style="width:6%; color:#f39c12;">
+                                    Late
+                                </th>
+                                <th class="text-center" style="width:7%; color:#e67e22;">
+                                    Early Checkout
+                                </th>
+                                <th class="text-center" style="width:7%; color:#e74c3c;">
+                                    Post-Noon
+                                </th>
+                                <th class="text-center" style="width:6%; color:#c0392b;">
+                                    Absent
+                                </th>
+                                <th class="text-center" style="width:6%; color:#3498db;">
+                                    Leave
+                                </th>
+                                <th class="text-center" style="width:7%; color:#e74c3c;">
+                                    Missed Checkout
+                                </th>
+                                <th class="text-center" style="width:6%; color:#95a5a6;">
+                                    Sat Off
+                                </th>
+                                <th class="text-center" style="width:8%; color:#8e44ad;">
+                                    Leave Balance
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="rows" t-as="row">
+                                <tr t-attf-style="background-color: #{ 'white' if row_index % 2 == 0 else '#f8f9fa' };">
+                                    <td><t t-esc="row_index + 1"/></td>
+                                    <td>
+                                        <strong><t t-esc="row['employee'].name"/></strong>
+                                        <br/>
+                                        <small class="text-muted">
+                                            <t t-esc="row['employee'].job_id.name or ''"/>
+                                        </small>
+                                    </td>
+                                    <td><t t-esc="row['department']"/></td>
+
+                                    <!-- Working Days -->
+                                    <td class="text-center">
+                                        <strong><t t-esc="row['total_working_days']"/></strong>
+                                    </td>
+
+                                    <!-- On-Time -->
+                                    <td class="text-center"
+                                        t-attf-style="color:{ '#27ae60' if row['on_time_count'] > 0 else 'inherit' };">
+                                        <t t-esc="row['on_time_count']"/>
+                                    </td>
+
+                                    <!-- Late -->
+                                    <td class="text-center"
+                                        t-attf-style="color:{ '#e67e22' if row['late_count'] > 0 else 'inherit' }; font-weight:{ 'bold' if row['late_count'] > 0 else 'normal' };">
+                                        <t t-esc="row['late_count']"/>
+                                    </td>
+
+                                    <!-- Early Checkout -->
+                                    <td class="text-center"
+                                        t-attf-style="color:{ '#e67e22' if row['early_checkout_count'] > 0 else 'inherit' }; font-weight:{ 'bold' if row['early_checkout_count'] > 0 else 'normal' };">
+                                        <t t-esc="row['early_checkout_count']"/>
+                                    </td>
+
+                                    <!-- Post-Noon -->
+                                    <td class="text-center"
+                                        t-attf-style="color:{ '#e74c3c' if row['post_noon_count'] > 0 else 'inherit' }; font-weight:{ 'bold' if row['post_noon_count'] > 0 else 'normal' };">
+                                        <t t-esc="row['post_noon_count']"/>
+                                    </td>
+
+                                    <!-- Absent -->
+                                    <td class="text-center"
+                                        t-attf-style="color:{ '#c0392b' if row['absent_count'] > 0 else 'inherit' }; font-weight:{ 'bold' if row['absent_count'] > 0 else 'normal' };">
+                                        <t t-esc="row['absent_count']"/>
+                                    </td>
+
+                                    <!-- Leave -->
+                                    <td class="text-center"
+                                        t-attf-style="color:{ '#2980b9' if row['leave_count'] > 0 else 'inherit' };">
+                                        <t t-esc="row['leave_count']"/>
+                                    </td>
+
+                                    <!-- Missed Checkout -->
+                                    <td class="text-center"
+                                        t-attf-style="color:{ '#e74c3c' if row['missed_checkout_count'] > 0 else 'inherit' };">
+                                        <t t-esc="row['missed_checkout_count']"/>
+                                    </td>
+
+                                    <!-- Sat Off -->
+                                    <td class="text-center" style="color:#7f8c8d;">
+                                        <t t-esc="row['sat_off_count']"/>
+                                    </td>
+
+                                    <!-- Leave Balance -->
+                                    <td class="text-center"
+                                        t-attf-style="color:#8e44ad; font-weight:bold;">
+                                        <t t-esc="row['leave_balance']"/>
+                                    </td>
+                                </tr>
+                            </t>
+
+                            <!-- Totals Row -->
+                            <tr style="background-color:#2c3e50; color:#ffffff; font-weight:bold;">
+                                <td colspan="3" class="text-right">
+                                    <strong>Total</strong>
+                                </td>
+                                <td class="text-center">
+                                    <t t-esc="sum(r['total_working_days'] for r in rows)"/>
+                                </td>
+                                <td class="text-center">
+                                    <t t-esc="sum(r['on_time_count'] for r in rows)"/>
+                                </td>
+                                <td class="text-center">
+                                    <t t-esc="sum(r['late_count'] for r in rows)"/>
+                                </td>
+                                <td class="text-center">
+                                    <t t-esc="sum(r['early_checkout_count'] for r in rows)"/>
+                                </td>
+                                <td class="text-center">
+                                    <t t-esc="sum(r['post_noon_count'] for r in rows)"/>
+                                </td>
+                                <td class="text-center">
+                                    <t t-esc="sum(r['absent_count'] for r in rows)"/>
+                                </td>
+                                <td class="text-center">
+                                    <t t-esc="sum(r['leave_count'] for r in rows)"/>
+                                </td>
+                                <td class="text-center">
+                                    <t t-esc="sum(r['missed_checkout_count'] for r in rows)"/>
+                                </td>
+                                <td class="text-center">
+                                    <t t-esc="sum(r['sat_off_count'] for r in rows)"/>
+                                </td>
+                                <!-- Leave Balance total row te blank -->
+                                <td class="text-center">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Footer note -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <small class="text-muted">
+                                * Generated on
+                                <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d %b %Y %I:%M %p')"/>
+                            </small>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

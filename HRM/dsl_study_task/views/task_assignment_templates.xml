@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="task_assignment_notification">
+        <div>
+            <p>
+                You have been assigned to the task
+                <strong><t t-esc="task.name"/></strong>
+                <t t-if="project_name">
+                    in project <strong><t t-esc="project_name"/></strong>
+                </t>.
+            </p>
+            <t t-if="task.date_deadline">
+                <p>Deadline: <strong><t t-esc="task.date_deadline"/></strong></p>
+            </t>
+            <t t-if="task.description">
+                <p>Description: <t t-out="task.description"/></p>
+            </t>
+        </div>
+    </template>
+</odoo>

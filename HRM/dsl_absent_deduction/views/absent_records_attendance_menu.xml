@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List View -->
+    <record id="view_absent_log_list_attendance_menu" model="ir.ui.view">
+        <field name="name">absent.deduction.log.list.attendance.menu</field>
+        <field name="model">absent.deduction.log</field>
+        <field name="arch" type="xml">
+            <tree string="Absent Records"
+                create="false"
+                edit="false"
+                delete="false"
+                default_order="check_date desc"
+                decoration-danger="status == 'deducted'"
+                decoration-muted="status == 'skipped'">
+
+                <field name="check_date"  string="Date"/>
+                <field name="employee_id" string="Employee"/>
+                <field name="status"
+                    string="Status"
+                    widget="badge"
+                    decoration-danger="status == 'deducted'"
+                    decoration-warning="status == 'skipped'"/>
+                <field name="reason"    string="Reason / Note" optional="show"/>
+                <field name="run_at"    string="Processed At"  optional="hide"/>
+                <field name="config_id" string="Config"        optional="hide"/>
+
+            </tree>
+        </field>
+    </record>
+
+
+    <!-- Form View -->
+    <record id="view_absent_log_form_attendance_menu" model="ir.ui.view">
+        <field name="name">absent.deduction.log.form.attendance.menu</field>
+        <field name="model">absent.deduction.log</field>
+        <field name="arch" type="xml">
+            <form string="Absent Record" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group string="Employee Info">
+                            <field name="employee_id" readonly="1"/>
+                            <field name="check_date"  readonly="1"/>
+                        </group>
+                        <group string="Status">
+                            <field name="status" readonly="1"
+                                widget="badge"
+                                decoration-danger="status == 'deducted'"
+                                decoration-warning="status == 'skipped'"/>
+                            <field name="run_at"    readonly="1"/>
+                            <field name="config_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Details">
+                        <field name="reason" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <!-- Search View -->
+    <record id="view_absent_log_search_attendance_menu" model="ir.ui.view">
+        <field name="name">absent.deduction.log.search.attendance.menu</field>
+        <field name="model">absent.deduction.log</field>
+        <field name="arch" type="xml">
+            <search string="Absent Records">
+
+                <field name="employee_id" string="Employee"/>
+                <field name="check_date"  string="Date"/>
+
+                <filter string="Absent (Deducted)"
+                    name="filter_deducted"
+                    domain="[('status', '=', 'deducted')]"/>
+                <filter string="Skipped"
+                    name="filter_skipped"
+                    domain="[('status', '=', 'skipped')]"/>
+
+                <separator/>
+
+                <filter string="Today"
+                    name="filter_today"
+                    domain="[('check_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+
+                <filter string="This Month"
+                    name="filter_this_month"
+                    domain="[
+                        ('check_date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
+                        ('check_date', '&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))
+                    ]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Employee"
+                        name="group_by_employee"
+                        context="{'group_by': 'employee_id'}"/>
+                    <filter string="Date"
+                        name="group_by_date"
+                        context="{'group_by': 'check_date'}"/>
+                    <filter string="Month"
+                        name="group_by_month"
+                        context="{'group_by': 'check_date:month'}"/>
+                    <filter string="Status"
+                        name="group_by_status"
+                        context="{'group_by': 'status'}"/>
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_absent_records_in_attendance" model="ir.actions.act_window">
+        <field name="name">Absent Records</field>
+        <field name="res_model">absent.deduction.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_absent_log_list_attendance_menu')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_absent_log_form_attendance_menu')}),
+        ]"/>
+        <field name="search_view_id" ref="view_absent_log_search_attendance_menu"/>
+        <field name="domain">[('status', '=', 'deducted')]</field>
+        <field name="context">{
+            'search_default_filter_deducted': 1,
+            'search_default_group_by_employee': 1,
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No absent records found!
+            </p>
+            <p>
+                Absent records are automatically created when an employee
+                has no attendance and no approved leave for a working day.
+            </p>
+        </field>
+    </record>
+
+
+    <!-- Menu: Attendance > Absent Records -->
+    <menuitem
+        id="menu_absent_records_in_attendance"
+        name="Absent Records"
+        parent="hr_attendance.menu_hr_attendance_root"
+        action="action_absent_records_in_attendance"
+        sequence="30"/>
+
+</odoo>

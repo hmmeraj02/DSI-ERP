@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_absent_deduction_config_manager,absent.deduction.config manager,model_absent_deduction_config,hr.group_hr_manager,1,1,1,1
+access_absent_deduction_config_user,absent.deduction.config user,model_absent_deduction_config,hr.group_hr_user,1,0,0,0
+access_absent_deduction_log_manager,absent.deduction.log manager,model_absent_deduction_log,hr.group_hr_manager,1,1,1,1
+access_absent_deduction_log_user,absent.deduction.log user,model_absent_deduction_log,hr.group_hr_user,1,0,0,0

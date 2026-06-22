@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_leave_deduction_config_form" model="ir.ui.view">
+        <field name="name">leave.deduction.config.form</field>
+        <field name="model">leave.deduction.config</field>
+        <field name="arch" type="xml">
+            <form string="Leave Deduction Configuration">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="company_id" options="{'no_create': True}" />
+                            <field name="active" />
+                        </group>
+                        <group>
+                            <field name="leave_type_id"
+                                options="{'no_create': True}"
+                                required="1" />
+                        </group>
+                    </group>
+
+                    <!-- <group string="Allocation Settings">
+                        <group>
+                            <field name="auto_create_allocation" />
+                            <field name="initial_allocation_days"
+                                invisible="not auto_create_allocation"
+                                required="auto_create_allocation" />
+                        </group>
+                    </group>
+
+                    <div class="alert alert-warning" role="alert"
+                        invisible="auto_create_allocation">
+                        <strong>⚠ Auto-Create Disabled:</strong> Make sure all employees have
+                        validated allocations for the selected time-off type. Otherwise, deductions
+                        will fail. </div> -->
+
+                    <notebook>
+                        <page string="Late Check-in Rules" name="late_checkin">
+                            <group>
+                                <group string="Office Timing">
+                                    <field name="office_start_time" widget="float_time" />
+                                    <field name="late_threshold_minutes" />
+                                </group>
+                                <group string="Deduction Rules">
+                                    <field name="late_days_for_deduction" />
+                                    <field name="noon_threshold_time" widget="float_time" />
+                                </group>
+                            </group>
+                            <div class="alert alert-info" role="alert">
+                                <strong>Rule 1:</strong> Employee will be marked late if check-in is
+                                after <field name="office_start_time" readonly="1"
+                                    widget="float_time" /> + <field name="late_threshold_minutes"
+                                    readonly="1" /> minutes. After <field
+                                    name="late_days_for_deduction" readonly="1" /> late days, 1.0
+                                day will be deducted. <br />
+                                <strong>Rule 2:</strong> If check-in is
+                                after <field name="noon_threshold_time" readonly="1"
+                                    widget="float_time" />, 0.5 day will be deducted immediately
+                                (overrides Rule 1). </div>
+                        </page>
+
+                        <page string="Early Check-out Rules" name="early_checkout">
+                            <group>
+                                <group string="Office Timing">
+                                    <field name="office_end_time" widget="float_time" />
+                                </group>
+                                <group string="Early Checkout Detection Window">
+                                    <field name="early_checkout_start_time" widget="float_time" />
+                                    <field name="early_checkout_end_time" widget="float_time" />
+                                </group>
+                            </group>
+                            <div class="alert alert-info" role="alert">
+                                <strong>Rule 3:</strong> If employee checks out between <field
+                                    name="early_checkout_start_time" readonly="1"
+                                    widget="float_time" /> and <field name="early_checkout_end_time"
+                                    readonly="1" widget="float_time" />, 0.5 day will be deducted.
+                                Early minutes are calculated from official end time
+                                (<field name="office_end_time" readonly="1" widget="float_time" />).
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_leave_deduction_config_tree" model="ir.ui.view">
+        <field name="name">leave.deduction.config.tree</field>
+        <field name="model">leave.deduction.config</field>
+        <field name="arch" type="xml">
+            <tree string="Leave Deduction Configurations">
+                <field name="company_id" />
+                <field name="leave_type_id" />
+                <field name="auto_create_allocation" />
+                <field name="office_start_time" widget="float_time" />
+                <field name="late_threshold_minutes" />
+                <field name="late_days_for_deduction" />
+                <field name="active" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_leave_deduction_config" model="ir.actions.act_window">
+        <field name="name">Leave Deduction Configuration</field>
+        <field name="res_model">leave.deduction.config</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure leave deduction rules
+            </p>
+        </field>
+    </record>
+
+    <!-- <menuitem id="menu_leave_deduction_root"
+        name="Leave Deductions"
+        parent="hr_attendance.menu_hr_attendance_root"
+        sequence="50" />
+
+    <menuitem id="menu_leave_deduction_config"
+        name="Configuration"
+        parent="menu_leave_deduction_root"
+        action="action_leave_deduction_config"
+        sequence="10" /> -->
+</odoo>

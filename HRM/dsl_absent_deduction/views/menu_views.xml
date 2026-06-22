@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="hr_attendance.menu_hr_attendance_settings" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+    </record>
+
+    <menuitem
+        id="menu_leave_deduction_config"
+        name="Leave Deduction"
+        parent="hr_attendance.menu_hr_attendance_settings"
+        action="auto_leave_deduction.action_leave_deduction_config"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_absent_deduction_config"
+        name="Absence Deduction"
+        parent="hr_attendance.menu_hr_attendance_settings"
+        action="action_absent_deduction_config"
+        sequence="20"
+    />
+
+</odoo>

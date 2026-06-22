@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="ir_cron_process_pending_deductions" model="ir.cron">
+            <field name="name">Process Pending Leave Deductions</field>
+            <field name="model_id" ref="model_leave_deduction_log" />
+            <field name="state">code</field>
+            <field name="code">
+                model.search([('state', '=', 'draft')]).action_process()
+            </field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True" />
+        </record>
+    </data>
+</odoo>

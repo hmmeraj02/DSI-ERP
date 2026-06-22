@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!--
+            Scheduled Action: Auto Checkout
+            ===============================
+            Runs every day at 8:00 PM Asia/Dhaka = 2:00 PM UTC
+            Finds employees who forgot to check out and sets check_out automatically.
+
+            nextcall is set to 14:00:00 UTC = 20:00:00 Asia/Dhaka
+        -->
+        <record id="ir_cron_auto_checkout" model="ir.cron">
+            <field name="name">HR Attendance: Auto Checkout</field>
+            <field name="model_id" ref="hr_attendance.model_hr_attendance"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_auto_checkout()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active">True</field>
+            <!-- 14:00 UTC = 20:00 Asia/Dhaka (UTC+6) -->
+            <field name="nextcall">2025-01-01 14:00:00</field>
+            <field name="priority">5</field>
+        </record>
+
+    </data>
+</odoo>

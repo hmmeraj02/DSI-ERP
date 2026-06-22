@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add IP Address columns to Attendance List/Tree View -->
+    <record id="hr_attendance_view_list_ip" model="ir.ui.view">
+        <field name="name">hr.attendance.list.ip</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
+        <field name="arch" type="xml">
+            <field name="in_mode" position="after">
+                <field name="in_ip_address" string="Check-In IP" optional="show"/>
+                <field name="out_ip_address" string="Check-Out IP" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Add IP Address fields to Attendance Form View -->
+    <record id="hr_attendance_view_form_ip" model="ir.ui.view">
+        <field name="name">hr.attendance.form.ip</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
+        <field name="arch" type="xml">
+            <field name="in_mode" position="after">
+                <field name="in_ip_address" string="Check-In IP Address" readonly="1"/>
+            </field>
+            <field name="out_mode" position="after">
+                <field name="out_ip_address" string="Check-Out IP Address" readonly="1"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

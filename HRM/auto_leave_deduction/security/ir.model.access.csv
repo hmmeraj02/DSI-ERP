@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_leave_deduction_config_user,leave.deduction.config.user,model_leave_deduction_config,hr.group_hr_user,1,0,0,0
+access_leave_deduction_config_manager,leave.deduction.config.manager,model_leave_deduction_config,hr.group_hr_manager,1,1,1,1
+access_leave_deduction_log_user,leave.deduction.log.user,model_leave_deduction_log,hr.group_hr_user,1,0,0,0
+access_leave_deduction_log_manager,leave.deduction.log.manager,model_leave_deduction_log,hr.group_hr_manager,1,0,1,0
+access_attendance_summary_wizard_user,attendance.summary.wizard.user,model_attendance_summary_wizard,hr.group_hr_user,1,1,1,1
+access_attendance_summary_wizard_manager,attendance.summary.wizard.manager,model_attendance_summary_wizard,hr.group_hr_manager,1,1,1,1

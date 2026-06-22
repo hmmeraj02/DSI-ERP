@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_employee_form_leave_deduction" model="ir.ui.view">
+        <field name="name">hr.employee.form.leave.deduction</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Leave Deductions" name="leave_deductions">
+                    <group>
+                        <group>
+                            <field name="late_check_in_count" />
+                            <field name="last_late_reset_date" />
+                            <field name="total_deductions" />
+                        </group>
+                        <!-- <group string="Custom Deduction Settings">
+                            <field name="use_custom_deduction_leave_type" />
+                            <field name="custom_deduction_leave_type_id"
+                                invisible="not use_custom_deduction_leave_type"
+                                required="use_custom_deduction_leave_type"
+                                options="{'no_create': True}" />
+                        </group> -->
+                    </group>
+
+                    <field name="deduction_log_ids" readonly="1">
+                        <tree decoration-danger="state == 'failed'"
+                            decoration-success="state == 'processed'"
+                            decoration-muted="state == 'cancelled'"
+                            create="false"
+                            edit="false"
+                            delete="false">
+                            <field name="deduction_date" />
+                            <field name="deduction_type" />
+                            <field name="days_deducted" />
+                            <field name="leave_allocation_id" />
+                            <field name="state" />
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

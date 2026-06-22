@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_task_form_inherit_schedule_date" model="ir.ui.view">
+        <field name="name">project.task.form.inherit.schedule.date</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project_todo.project_task_view_todo_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tag_ids']/.." position="after">
+                <div class="py-1 px-2 border rounded bg-view d-flex align-items-center gap-2">
+                    <span class="text-muted" style="font-size:13px; white-space:nowrap;">Schedule Date</span>
+                    <field name="schedule_date" widget="datetime" nolabel="1"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
