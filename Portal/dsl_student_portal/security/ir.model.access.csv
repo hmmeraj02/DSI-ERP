@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dsl_study_complain_type_portal,access.dsl.study.complain.type,model_dsl_study_complain_type,base.group_portal,1,1,1,0
+access_dsl_study_complain_portal,access.dsl.study.complain,model_dsl_study_complain,base.group_portal,1,1,1,0
+access_dsl_study_student_program_line_portal,access.dsl.study.student.program.line,model_dsl_study_student_program_line,base.group_portal,1,1,1,0
+access_dsl_study_student_result_portal,access.dsl.study.student.result.portal,model_dsl_study_student_result,base.group_portal,1,0,1,0
+access_dsl_study_student_portal,access.dsl.study.student.portal,model_dsl_study_student,base.group_portal,1,1,1,0
+access_dsl_study_agent_portal,access.dsl.study.agent.portal,model_dsl_study_agent,base.group_portal,1,1,1,0

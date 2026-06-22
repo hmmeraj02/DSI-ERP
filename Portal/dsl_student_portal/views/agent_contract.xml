@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="agent_contract" name="Agent Contract">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'contract'"/>
+            <div class="container-fluid py-4">
+                <div class="row">
+                    <t t-call="dsl_student_portal.agent_sidebar" />
+                    <div class="col-lg-9 col-md-8 col-12">
+
+                        <!-- Page header -->
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="fa fa-file-text fa-2x text-primary me-3"></i>
+                            <h4 class="mb-0">Contract</h4>
+                        </div>
+
+                        <!-- Flash messages -->
+                        <t t-set="qs_success" t-value="request.params.get('success')"/>
+                        <t t-set="qs_error"   t-value="request.params.get('error')"/>
+                        <t t-if="qs_success">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fa fa-check-circle me-2"></i>
+                                <t t-esc="qs_success"/>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                            </div>
+                        </t>
+                        <t t-if="qs_error">
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fa fa-exclamation-circle me-2"></i>
+                                <t t-esc="qs_error"/>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                            </div>
+                        </t>
+
+                        <!-- ══════════════════════════════════════════════
+                             SECTION 1 — Commission Structure
+                             Conditional on commission_category
+                        ══════════════════════════════════════════════ -->
+
+                        <!-- COMBINE -->
+                        <t t-if="agent.commission_category == 'combine'">
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-header bg-white py-3">
+                                    <h6 class="mb-0 fw-semibold">
+                                        <i class="fa fa-list-alt text-primary me-2"></i>
+                                        Commission Structure
+                                        <span class="badge bg-secondary-subtle text-secondary ms-2">Combine</span>
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-sm-6">
+                                            <div class="text-muted small mb-1">Type</div>
+                                            <t t-if="agent.type == 'fixed'">
+                                                <span class="badge rounded-pill bg-info-subtle text-info border border-info-subtle">Fixed</span>
+                                            </t>
+                                            <t t-elif="agent.type == 'percentage'">
+                                                <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle">Percentage</span>
+                                            </t>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="text-muted small mb-1">Commission</div>
+                                            <span class="fw-semibold fs-5">
+                                                <t t-if="agent.type == 'fixed'">
+                                                    <t t-esc="agent.currency_id.symbol or ''"/>
+                                                    <t t-esc="'%.2f' % agent.amount"/>
+                                                </t>
+                                                <t t-elif="agent.type == 'percentage'">
+                                                    <t t-esc="'%.2f' % agent.percentage"/>%
+                                                </t>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- COUNTRY WISE -->
+                        <t t-elif="agent.commission_category == 'country_wise'">
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+                                    <h6 class="mb-0 fw-semibold">
+                                        <i class="fa fa-list-alt text-primary me-2"></i>
+                                        Commission Structure
+                                        <span class="badge bg-secondary-subtle text-secondary ms-2">Country Wise</span>
+                                    </h6>
+                                    <span class="badge bg-primary-subtle text-primary">
+                                        <t t-esc="len(agent.line_ids)"/> entries
+                                    </span>
+                                </div>
+                                <div class="card-body p-0">
+                                    <t t-if="agent.line_ids">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th class="ps-4" style="width:5%">#</th>
+                                                        <th style="width:40%">Country</th>
+                                                        <th style="width:20%" class="text-center">Type</th>
+                                                        <th style="width:35%" class="text-end pe-4">Commission</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="agent.line_ids" t-as="line">
+                                                        <tr>
+                                                            <td class="ps-4 text-muted small">
+                                                                <t t-esc="line_index + 1"/>
+                                                            </td>
+                                                            <td>
+                                                                <t t-if="line.country_id">
+                                                                    <span class="fw-medium">
+                                                                        <t t-esc="line.country_id.name"/>
+                                                                    </span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="text-muted">—</span>
+                                                                </t>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <t t-if="line.type == 'fixed'">
+                                                                    <span class="badge rounded-pill bg-info-subtle text-info border border-info-subtle">Fixed</span>
+                                                                </t>
+                                                                <t t-elif="line.type == 'percentage'">
+                                                                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle">Percentage</span>
+                                                                </t>
+                                                            </td>
+                                                            <td class="text-end fw-semibold pe-4">
+                                                                <t t-if="line.type == 'fixed'">
+                                                                    <t t-esc="line.currency_id.symbol or ''"/>
+                                                                    <t t-esc="'%.2f' % line.amount"/>
+                                                                </t>
+                                                                <t t-elif="line.type == 'percentage'">
+                                                                    <t t-esc="'%.2f' % line.percentage"/>%
+                                                                </t>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="text-center py-5 text-muted">
+                                            <i class="fa fa-file-text fa-3x mb-3 opacity-25"></i>
+                                            <p class="mb-0">No commission lines found for this contract.</p>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- ══════════════════════════════════════════════
+                             SECTION 2 — Contract Document
+                             (agent.contract_document + details + expire)
+                        ══════════════════════════════════════════════ -->
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white py-3">
+                                <h6 class="mb-0 fw-semibold">
+                                    <i class="fa fa-file-pdf-o text-danger me-2"></i>
+                                    Contract Document
+                                </h6>
+                            </div>
+                            <div class="card-body">
+
+                                <!-- Document upload/download row -->
+                                <t t-if="agent.contract_document">
+                                    <div class="d-flex align-items-center justify-content-between p-3 border rounded bg-light mb-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <i class="fa fa-file fa-2x text-primary"></i>
+                                            <div>
+                                                <div class="fw-medium">
+                                                    <t t-esc="agent.contract_document_filename or 'Contract Document'"/>
+                                                </div>
+                                                <div class="text-muted small">Uploaded</div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <a t-attf-href="/web/content/dsl.study.agent/#{agent.id}/contract_document/#{agent.contract_document_filename or 'contract'}?download=true"
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fa fa-download me-1"></i> Download
+                                            </a>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="text-center py-4 mb-3">
+                                        <i class="fa fa-file-o fa-3x text-muted mb-3 opacity-50"></i>
+                                        <p class="text-muted mb-0">No contract document available.</p>
+                                    </div>
+                                </t>
+
+                                <!-- Contract details & expire date -->
+                                <div class="row g-3 mt-1">
+                                    <div class="col-12">
+                                        <div class="text-muted small mb-1">Contract / MOU Details</div>
+                                        <t t-if="agent.contract_details">
+                                            <p class="mb-0" style="white-space: pre-line;">
+                                                <t t-esc="agent.contract_details"/>
+                                            </p>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="text-muted fst-italic">No details provided.</span>
+                                        </t>
+                                    </div>
+                                    <t t-if="agent.signing_date">
+                                        <div class="col-sm-6">
+                                            <div class="text-muted small mb-1">MOU Signing Date</div>
+                                            <span class="fw-medium">
+                                                <t t-esc="agent.signing_date"/>
+                                            </span>
+                                        </div>
+                                    </t>
+                                    <t t-if="agent.expire_date">
+                                        <div class="col-sm-6">
+                                            <div class="text-muted small mb-1">MOU Expiry Date</div>
+                                            <span class="fw-medium">
+                                                <t t-esc="agent.expire_date"/>
+                                            </span>
+                                        </div>
+                                    </t>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

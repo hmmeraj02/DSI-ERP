@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="student_security" name="Student Security">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'security'"/>
+            <div class="container-fluid py-4">
+                <div class="row">
+                    <!-- Left Sidebar -->
+                    <t t-call="dsl_student_portal.student_sidebar" />
+
+                    <!-- Main Content -->
+                    <div class="col-lg-9 col-md-8 col-12">
+
+                        <!-- Page Header -->
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="fa fa-lock fa-2x text-primary me-3"></i>
+                            <h4 class="mb-0">Connection &amp; Security</h4>
+                        </div>
+
+                        <!-- Change Password -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3 border-bottom">
+                                <h5 class="mb-0 fw-bold">
+                                    <i class="fa fa-key me-2 text-primary"></i>Change Password
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="get_error">
+                                    <div class="alert alert-danger">
+                                        <t t-esc="get_error"/>
+                                    </div>
+                                </t>
+                                <t t-if="get_success">
+                                    <div class="alert alert-success">
+                                        <t t-esc="get_success"/>
+                                    </div>
+                                </t>
+                                <form action="/web/auth/change_password" method="post" class="mt-2">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="redirect" value="/my/security"/>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Current Password</label>
+                                        <input type="password" name="old_pwd" class="form-control" autocomplete="current-password" required=""/>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">New Password</label>
+                                        <input type="password" name="new_password" class="form-control" autocomplete="new-password" required=""/>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold">Confirm New Password</label>
+                                        <input type="password" name="confirm_pwd" class="form-control" autocomplete="new-password" required=""/>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="fa fa-save me-2"></i>Change Password
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Two-Factor Authentication -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3 border-bottom">
+                                <h5 class="mb-0 fw-bold">
+                                    <i class="fa fa-shield me-2 text-primary"></i>Two-Factor Authentication
+                                    <a href="#" class="ms-2 text-muted small" data-bs-toggle="tooltip" title="Adds an extra layer of security to your account.">
+                                        <i class="fa fa-info-circle"></i>
+                                    </a>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="two_factor_state == 'enabled'">
+                                    <div class="alert alert-success d-flex align-items-center mb-3">
+                                        <i class="fa fa-check-circle me-2"></i>
+                                        Two-factor authentication is enabled.
+                                    </div>
+                                    <a href="/web/login/totp/disable" class="btn btn-outline-danger px-4">
+                                        <i class="fa fa-times me-2"></i>Disable Two-Factor Authentication
+                                    </a>
+                                </t>
+                                <t t-else="">
+                                    <div class="alert alert-warning d-flex align-items-center mb-3">
+                                        <i class="fa fa-exclamation-triangle me-2"></i>
+                                        Two-factor authentication is not enabled.
+                                    </div>
+                                    <a href="/web/login/totp/enable" class="btn btn-outline-primary px-4">
+                                        <i class="fa fa-lock me-2"></i>Enable Two-Factor Authentication
+                                    </a>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Revoke Sessions -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3 border-bottom">
+                                <h5 class="mb-0 fw-bold">
+                                    <i class="fa fa-sign-out me-2 text-primary"></i>Revoke All Sessions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted mb-3">Log out from all devices and revoke all active sessions.</p>
+                                <a href="/web/session/logout?redirect=/web/login" class="btn btn-outline-warning px-4">
+                                    <i class="fa fa-power-off me-2"></i>Log out from all devices
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Delete Account -->
+                        <div class="card shadow-sm border-0 border-danger mb-4" style="border: 1px solid #dc3545 !important;">
+                            <div class="card-header bg-white py-3 border-bottom">
+                                <h5 class="mb-0 fw-bold text-danger">
+                                    <i class="fa fa-trash me-2"></i>Delete Account
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted mb-3">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                                <a href="/my/account" class="btn btn-outline-danger px-4">
+                                    <i class="fa fa-trash me-2"></i>Delete Account
+                                </a>
+                            </div>
+                        </div>
+
+                    </div> <!-- Close col-lg-9 -->
+                </div> <!-- Close row -->
+            </div> <!-- Close container-fluid -->
+        </t>
+    </template>
+</odoo>

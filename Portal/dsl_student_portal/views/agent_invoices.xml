@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="agent_invoices" name="Agent Invoices">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'invoices'"/>
+            <div class="container-fluid py-4">
+                <div class="row">
+                    <!-- Left Sidebar -->
+                    <t t-call="dsl_student_portal.agent_sidebar" />
+
+                    <!-- Main Content -->
+                    <div class="col-lg-9 col-md-8 col-12">
+
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="fa fa-file-text fa-2x text-primary me-3"></i>
+                            <h4 class="mb-0">Invoices &amp; Bills</h4>
+                        </div>
+
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0 align-middle">
+                                        <thead class="bg-light text-muted">
+                                            <tr>
+                                                <th class="ps-4">Invoice #</th>
+                                                <th>Student</th>
+                                                <th>Description</th>
+                                                <th>Invoice Date</th>
+                                                <th>Due Date</th>
+                                                <th>Status</th>
+                                                <th class="text-end pe-4">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="invoices" t-as="invoice">
+                                                <tr>
+                                                    <td class="ps-4">
+                                                        <span class="fw-bold"><t t-esc="invoice.name"/></span>
+                                                    </td>
+                                                    <td>
+                                                        <t t-set="std" t-value="partner_to_student.get(invoice.partner_id.id)"/>
+                                                        <t t-if="std">
+                                                            <span class="fw-bold small"><t t-esc="std.name"/></span><br/>
+                                                            <small class="text-muted"><t t-esc="std.student_id_string"/></small>
+                                                        </t>
+                                                        <t t-else="">-</t>
+                                                    </td>
+                                                    <td>
+                                                        <t t-foreach="invoice.invoice_line_ids.filtered(lambda l: l.display_type == 'product')" t-as="line">
+                                                            <div class="small"><t t-esc="line.name"/></div>
+                                                        </t>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="invoice.invoice_date">
+                                                            <t t-esc="invoice.invoice_date" t-options='{"widget": "date"}'/>
+                                                        </t>
+                                                        <t t-else="">-</t>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="invoice.invoice_date_due">
+                                                            <t t-esc="invoice.invoice_date_due" t-options='{"widget": "date"}'/>
+                                                        </t>
+                                                        <t t-else="">-</t>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="invoice.payment_state == 'paid'">
+                                                            <span class="badge rounded-pill px-3 py-2" style="background:#198754;">
+                                                                <i class="fa fa-check me-1"></i>Paid
+                                                            </span>
+                                                        </t>
+                                                        <t t-elif="invoice.payment_state in ('not_paid', 'partial') and invoice.invoice_date_due and invoice.invoice_date_due &lt; today">
+                                                            <span class="badge rounded-pill px-3 py-2 bg-danger">
+                                                                <i class="fa fa-clock-o me-1"></i>Overdue
+                                                            </span>
+                                                        </t>
+                                                        <t t-elif="invoice.payment_state in ('not_paid', 'partial')">
+                                                            <span class="badge rounded-pill px-3 py-2" style="background:#0d6efd;">
+                                                                <i class="fa fa-hourglass-half me-1"></i>Waiting for Payment
+                                                            </span>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span class="badge rounded-pill px-3 py-2 bg-secondary">
+                                                                <t t-esc="invoice.payment_state"/>
+                                                            </span>
+                                                        </t>
+                                                    </td>
+                                                    <td class="text-end pe-4 fw-bold">
+                                                        <t t-esc="invoice.amount_total" t-options='{"widget": "monetary", "display_currency": invoice.currency_id}'/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                            <t t-if="not invoices">
+                                                <tr>
+                                                    <td colspan="7" class="text-center py-5 text-muted">
+                                                        <i class="fa fa-file-text fa-3x mb-3 opacity-25"></i>
+                                                        <p class="mb-0">No invoices found.</p>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

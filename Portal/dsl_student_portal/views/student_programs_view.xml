@@ -1,0 +1,826 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Student Programs Template -->
+    <template id="student_programs" name="Student Programs">
+        <t t-call="portal.portal_layout">
+            <div class="container-fluid">
+                <div class="row">
+                    <!-- Left Sidebar - Profile Card -->
+                    <t t-call="dsl_student_portal.student_sidebar" />
+
+                    <!-- Main Content Area -->
+                    <div class="col-lg-9 col-md-8 col-12">
+                        <!-- Success/Error Messages -->
+                        <t t-if="request.params.get('success')">
+                            <div class="alert alert-success alert-dismissible fade show"
+                                role="alert">
+                                <i class="fa fa-check-circle me-2"></i>
+                                <t t-esc="request.params.get('success')" />
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                        </t>
+                        <t t-if="request.params.get('error')">
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fa fa-exclamation-circle me-2"></i>
+                                <t t-esc="request.params.get('error')" />
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                        </t>
+
+                        <!-- Programs Summary -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <div class="card border-0 shadow-sm h-100"
+                                    style="background:linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-3">
+                                                <i class="fa fa-book fa-2x text-white opacity-75"></i>
+                                            </div>
+                                            <div class="col-9 text-end">
+                                                <h6 class="text-white mb-1">Total Programs</h6>
+                                                <h3 class="text-white mb-0 fw-bold"
+                                                    t-esc="len(programs)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <div class="card border-0 shadow-sm h-100"
+                                    style="background:linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-3">
+                                                <i class="fa fa-spinner fa-2x text-white opacity-75"></i>
+                                            </div>
+                                            <div class="col-9 text-end">
+                                                <h6 class="text-white mb-1">In Progress</h6>
+                                                <h3 class="text-white mb-0 fw-bold"
+                                                    t-esc="len(programs.filtered(lambda p: p.stage_code not in ['cancelled', 'done']))" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <div class="card border-0 shadow-sm h-100"
+                                    style="background:linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-3">
+                                                <i
+                                                    class="fa fa-check-circle fa-2x text-white opacity-75"></i>
+                                            </div>
+                                            <div class="col-9 text-end">
+                                                <h6 class="text-white mb-1">Completed</h6>
+                                                <h3 class="text-white mb-0 fw-bold"
+                                                    t-esc="len(programs.filtered(lambda p: p.stage_code == 'done'))" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <div class="card border-0 shadow-sm h-100"
+                                    style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-3">
+                                                <i
+                                                    class="fa fa-times-circle fa-2x text-white opacity-75"></i>
+                                            </div>
+                                            <div class="col-9 text-end">
+                                                <h6 class="text-white mb-1">Cancelled</h6>
+                                                <h3 class="text-white mb-0 fw-bold"
+                                                    t-esc="len(programs.filtered(lambda p: p.stage_code == 'cancelled'))" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Programs List -->
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-list me-2 text-primary"></i><t t-esc="page_title or 'All Programs'"/> </h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <t t-if="programs">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Program</th>
+                                                    <th>Country</th>
+                                                    <th>Institute</th>
+                                                    <th>Stage</th>
+                                                    <th>Status</th>
+                                                    <th class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="programs" t-as="program">
+                                                    <tr>
+                                                        <td>
+                                                            <strong
+                                                                t-esc="program.program_id.name or '-'" />
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="program.country_id">
+                                                                <i
+                                                                    class="fa fa-globe me-1 text-primary"></i>
+                                                                <t t-esc="program.country_id.name" />
+                                                            </t>
+                                                            <t t-else="">-</t>
+                                                        </td>
+                                                        <td t-esc="program.institute_id.name or '-'" />
+
+                                                        <!-- Stage Column -->
+                                                        <td>
+                                                            <span
+                                                                t-attf-class="badge bg-{{
+                                                                    'success' if program.stage_code == 'done' else
+                                                                    'primary' if program.stage_code in ['applied', 'confirmed'] else
+                                                                    'warning' if program.stage_code in ['submitted', 'draft'] else
+                                                                    'danger' if program.stage_code == 'cancelled' else
+                                                                    'info'
+                                                                }}">
+                                                                <t
+                                                                    t-esc="program.stage_id.name or program.stage_code.replace('_', ' ').title()" />
+                                                            </span>
+                                                        </td>
+                                                        <!-- Status Column: sub-state for the
+                                                        current stage -->
+                                                        <td>
+                                                            <t
+                                                                t-if="program.stage_code == 'applied'">
+                                                                <span
+                                                                    t-attf-class="badge bg-{{
+                                                                        'success' if program.apply_state == 'submit' else
+                                                                        'info' if program.apply_state == 'in_progress' else
+                                                                        'warning'
+                                                                    }}">
+                                                                    <t
+                                                                        t-esc="dict([('submit','Submit'),('in_progress','In Progress'),('pending','Pending')]).get(program.apply_state, '-')" />
+                                                                </span>
+                                                            </t>
+                                                            <t
+                                                                t-elif="program.stage_code == 'offer_letter'">
+                                                                <span
+                                                                    t-attf-class="badge bg-{{
+                                                                        'success' if program.offer_letter_state == 'accepted' else
+                                                                        'info' if program.offer_letter_state == 'issued' else
+                                                                        'danger'
+                                                                    }}">
+                                                                    <t
+                                                                        t-esc="dict([('issued','Issued'),('accepted','Accepted'),('rejected','Rejected')]).get(program.offer_letter_state, '-')" />
+                                                                </span>
+                                                            </t>
+                                                            <t
+                                                                t-elif="program.stage_code == 'sponsor_document'">
+                                                                <span
+                                                                    t-attf-class="badge bg-{{
+                                                                        'success' if program.sponsor_and_document_state == 'file_ready' else
+                                                                        'info'
+                                                                    }}">
+                                                                    <t
+                                                                        t-esc="dict([('file_ready','File Ready'),('in_progress','In Progress')]).get(program.sponsor_and_document_state, '-')" />
+                                                                </span>
+                                                            </t>
+                                                            <t
+                                                                t-elif="program.stage_code == 'gs_state'">
+                                                                <span
+                                                                    t-attf-class="badge bg-{{
+                                                                        'success' if program.gs_state == 'approve' else
+                                                                        'danger' if program.gs_state == 'reject' else
+                                                                        'warning' if program.gs_state == 'revised' else
+                                                                        'info' if program.gs_state == 'in_progress' else
+                                                                        'secondary'
+                                                                    }}">
+                                                                    <t
+                                                                        t-esc="dict([('submit','Submit'),('in_progress','In Progress'),('revised','Revised'),('approve','Approve'),('reject','Reject')]).get(program.gs_state, '-')" />
+                                                                </span>
+                                                            </t>
+                                                            <t
+                                                                t-elif="program.stage_code == 'tuition_fee'">
+                                                                <span
+                                                                    t-attf-class="badge bg-{{
+                                                                        'success' if program.tuition_fee_state == 'paid' else
+                                                                        'warning'
+                                                                    }}">
+                                                                    <t
+                                                                        t-esc="dict([('paid','Paid'),('unpaid','Unpaid')]).get(program.tuition_fee_state, '-')" />
+                                                                </span>
+                                                            </t>
+                                                            <t
+                                                                t-elif="program.stage_code == 'final_offer'">
+                                                                <span
+                                                                    t-attf-class="badge bg-{{
+                                                                        'success' if program.final_offer_state == 'received' else
+                                                                        'warning'
+                                                                    }}">
+                                                                    <t
+                                                                        t-esc="dict([('received','Received'),('not_received','Not Received')]).get(program.final_offer_state, '-')" />
+                                                                </span>
+                                                            </t>
+                                                            <t
+                                                                t-elif="program.stage_code == 'visa_documentation'">
+                                                                <span
+                                                                    t-attf-class="badge bg-{{
+                                                                        'success' if program.visa_documentation_state == 'ready' else
+                                                                        'warning'
+                                                                    }}">
+                                                                    <t
+                                                                        t-esc="dict([('ready','Ready'),('not_ready','Not Ready')]).get(program.visa_documentation_state, '-')" />
+                                                                </span>
+                                                            </t>
+                                                            <t
+                                                                t-elif="program.stage_code == 'visa_processing'">
+                                                                <span
+                                                                    t-attf-class="badge bg-{{
+                                                                        'success' if program.visa_state == 'approve' else
+                                                                        'danger' if program.visa_state == 'reject' else
+                                                                        'info'
+                                                                    }}">
+                                                                    <t
+                                                                        t-esc="dict([('apply','Applied'),('approve','Approved'),('reject','Rejected')]).get(program.visa_state, '-')" />
+                                                                </span>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <span class="text-muted">-</span>
+                                                            </t>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button
+                                                                class="btn btn-sm btn-outline-primary"
+                                                                data-bs-toggle="modal"
+                                                                t-attf-data-bs-target="#programModal{{program.id}}">
+                                                                <i class="fa fa-eye"></i> View </button>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Program Details Modal -->
+                                                    <div class="modal fade"
+                                                        t-attf-id="programModal{{program.id}}"
+                                                        tabindex="-1" aria-hidden="true">
+                                                        <div class="modal-dialog modal-lg">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">Program
+                                                                        Details</h5>
+                                                                    <button type="button"
+                                                                        class="btn-close"
+                                                                        data-bs-dismiss="modal"
+                                                                        aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+
+                                                                    <!-- ── Progress Bar ── -->
+                                                                    <t t-set="prog_pct" t-value="
+                                                                        100 if (program.stage_code == 'visa_processing' and program.visa_state in ['approve', 'reject']) else
+                                                                        100 if program.stage_code == 'done' else
+                                                                        80  if (program.stage_code == 'visa_processing' and program.visa_state == 'apply') else
+                                                                        60  if (program.stage_code == 'final_offer' and program.final_offer_state == 'received') else
+                                                                        60  if program.stage_code == 'visa_documentation' else
+                                                                        40  if (program.stage_code == 'final_offer' and program.final_offer_state != 'received') else
+                                                                        40  if program.stage_code == 'tuition_fee' else
+                                                                        40  if program.stage_code == 'gs_state' else
+                                                                        40  if program.stage_code == 'sponsor_document' else
+                                                                        40  if program.stage_code == 'offer_letter' else
+                                                                        40  if (program.stage_code == 'applied' and program.apply_state == 'submit') else
+                                                                        20  if (program.stage_code == 'applied' and program.apply_state in ['in_progress', 'pending']) else
+                                                                        20  if program.stage_code == 'confirmed' else
+                                                                        0
+                                                                    "/>
+                                                                    <div class="mb-4">
+                                                                        <div class="d-flex justify-content-between mb-1">
+                                                                            <small class="text-muted">Progress</small>
+                                                                            <small class="fw-bold" t-esc="str(prog_pct) + '%'"/>
+                                                                        </div>
+                                                                        <div class="progress" style="height:14px; border-radius:8px;">
+                                                                            <div class="progress-bar bg-success"
+                                                                                role="progressbar"
+                                                                                t-att-style="'width:' + str(prog_pct) + '%;'"
+                                                                                t-att-aria-valuenow="prog_pct"
+                                                                                aria-valuemin="0"
+                                                                                aria-valuemax="100">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="d-flex justify-content-between mt-1" style="font-size:10px; color:#999;">
+                                                                            <span>Program Selection<br/>20%</span>
+                                                                            <span class="text-center">Applied<br/>40%</span>
+                                                                            <span class="text-center">Offer Received<br/>60%</span>
+                                                                            <span class="text-center">Visa Applied<br/>80%</span>
+                                                                            <span class="text-end">Visa Result<br/>100%</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <hr class="mt-0 mb-3"/>
+
+                                                                    <!-- ── ROW 1: Program Identity ── -->
+                                                                    <div class="row g-3">
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Program Name</label>
+                                                                            <p class="fw-bold mb-0" t-esc="program.program_id.name or '-'" />
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Country</label>
+                                                                            <p class="fw-bold mb-0" t-esc="program.country_id.name or '-'" />
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Institute</label>
+                                                                            <p class="fw-bold mb-0" t-esc="program.institute_id.name or '-'" />
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Intake</label>
+                                                                            <p class="fw-bold mb-0" t-esc="program.intake_id.name or '-'" />
+                                                                        </div>
+
+                                                                        <!-- ── ROW 2: Campus / Stage / Status ── -->
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Campus</label>
+                                                                            <p class="fw-bold mb-0" t-esc="program.campus or '-'" />
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Stage</label>
+                                                                            <p class="mb-0">
+                                                                                <span t-attf-class="badge bg-{{
+                                                                                    'success' if program.stage_code == 'done' else
+                                                                                    'primary' if program.stage_code in ['applied', 'confirmed'] else
+                                                                                    'warning' if program.stage_code in ['submitted', 'draft'] else
+                                                                                    'danger' if program.stage_code == 'cancelled' else
+                                                                                    'info'
+                                                                                }}">
+                                                                                    <t t-esc="program.stage_id.name or program.stage_code.replace('_', ' ').title()" />
+                                                                                </span>
+                                                                            </p>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Status</label>
+                                                                            <p class="mb-0">
+                                                                                <t t-if="program.stage_code == 'applied'">
+                                                                                    <span t-attf-class="badge bg-{{ 'success' if program.apply_state == 'submit' else 'info' if program.apply_state == 'in_progress' else 'warning' }}">
+                                                                                        <t t-esc="dict([('submit','Submit'),('in_progress','In Progress'),('pending','Pending')]).get(program.apply_state, '-')" />
+                                                                                    </span>
+                                                                                </t>
+                                                                                <t t-elif="program.stage_code == 'offer_letter'">
+                                                                                    <span t-attf-class="badge bg-{{ 'success' if program.offer_letter_state == 'accepted' else 'info' if program.offer_letter_state == 'issued' else 'danger' }}">
+                                                                                        <t t-esc="dict([('issued','Issued'),('accepted','Accepted'),('rejected','Rejected')]).get(program.offer_letter_state, '-')" />
+                                                                                    </span>
+                                                                                </t>
+                                                                                <t t-elif="program.stage_code == 'sponsor_document'">
+                                                                                    <span t-attf-class="badge bg-{{ 'success' if program.sponsor_and_document_state == 'file_ready' else 'info' }}">
+                                                                                        <t t-esc="dict([('file_ready','File Ready'),('in_progress','In Progress')]).get(program.sponsor_and_document_state, '-')" />
+                                                                                    </span>
+                                                                                </t>
+                                                                                <t t-elif="program.stage_code == 'gs_state'">
+                                                                                    <span t-attf-class="badge bg-{{ 'success' if program.gs_state == 'approve' else 'danger' if program.gs_state == 'reject' else 'warning' if program.gs_state == 'revised' else 'info' if program.gs_state == 'in_progress' else 'secondary' }}">
+                                                                                        <t t-esc="dict([('submit','Submit'),('in_progress','In Progress'),('revised','Revised'),('approve','Approve'),('reject','Reject')]).get(program.gs_state, '-')" />
+                                                                                    </span>
+                                                                                </t>
+                                                                                <t t-elif="program.stage_code == 'tuition_fee'">
+                                                                                    <span t-attf-class="badge bg-{{ 'success' if program.tuition_fee_state == 'paid' else 'warning' }}">
+                                                                                        <t t-esc="dict([('paid','Paid'),('unpaid','Unpaid')]).get(program.tuition_fee_state, '-')" />
+                                                                                    </span>
+                                                                                </t>
+                                                                                <t t-elif="program.stage_code == 'final_offer'">
+                                                                                    <span t-attf-class="badge bg-{{ 'success' if program.final_offer_state == 'received' else 'warning' }}">
+                                                                                        <t t-esc="dict([('received','Received'),('not_received','Not Received')]).get(program.final_offer_state, '-')" />
+                                                                                    </span>
+                                                                                </t>
+                                                                                <t t-elif="program.stage_code == 'visa_documentation'">
+                                                                                    <span t-attf-class="badge bg-{{ 'success' if program.visa_documentation_state == 'ready' else 'warning' }}">
+                                                                                        <t t-esc="dict([('ready','Ready'),('not_ready','Not Ready')]).get(program.visa_documentation_state, '-')" />
+                                                                                    </span>
+                                                                                </t>
+                                                                                <t t-elif="program.stage_code == 'visa_processing'">
+                                                                                    <span t-attf-class="badge bg-{{ 'success' if program.visa_state == 'approve' else 'danger' if program.visa_state == 'reject' else 'info' }}">
+                                                                                        <t t-esc="dict([('apply','Applied'),('approve','Approved'),('reject','Rejected')]).get(program.visa_state, '-')" />
+                                                                                    </span>
+                                                                                </t>
+                                                                                <t t-else=""><span class="text-muted">-</span></t>
+                                                                            </p>
+                                                                        </div>
+                                                                        <!-- col-md-3 placeholder to keep grid: 4th col is the agree widget below -->
+                                                                        <div class="col-md-3"></div>
+
+                                                                        <!-- ── ROW 3: Financials ── -->
+                                                                        <div class="col-12"><hr class="my-1" /></div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Tuition Fee</label>
+                                                                            <p class="fw-bold mb-0">
+                                                                                <t t-esc="'{:,.2f}'.format(program.tuition_fee) if program.tuition_fee else '-'" />
+                                                                            </p>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Scholarship (%)</label>
+                                                                            <p class="fw-bold mb-0">
+                                                                                <t t-esc="'{:.2f}%'.format(program.scholarship_percentage) if program.scholarship_percentage else '-'" />
+                                                                            </p>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Scholarship Amount</label>
+                                                                            <p class="fw-bold mb-0 text-success">
+                                                                                <t t-esc="'{:,.2f}'.format(program.scholarship_amount) if program.scholarship_amount else '-'" />
+                                                                            </p>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Calculated Tuition Fee</label>
+                                                                            <p class="fw-bold mb-0 text-primary">
+                                                                                <t t-esc="'{:,.2f}'.format(program.calculated_fee) if program.calculated_fee else '-'" />
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <!-- ── NOTES (conditional) ── -->
+                                                                        <t t-if="program.note">
+                                                                            <div class="col-12"><hr class="my-1" /></div>
+                                                                            <div class="col-12">
+                                                                                <label class="text-muted small">Notes</label>
+                                                                                <p class="mb-0" t-esc="program.note" />
+                                                                            </div>
+                                                                        </t>
+                                                                    </div>
+
+                                                                    <!-- ══════════════════════════════════════════════════ -->
+                                                                    <!-- ── STUDENT AGREEMENT SECTION ── -->
+                                                                    <!-- ══════════════════════════════════════════════════ -->
+                                                                    <div class="mt-3 border-top pt-3">
+                                                                        <h6 class="mb-3 fw-bold">
+                                                                            <i class="fa fa-handshake-o me-2 text-primary"></i>Your Decision on This Program
+                                                                        </h6>
+
+                                                                        <!-- ── Current portal_status banner (yes/no only) ── -->
+                                                                        <t t-if="program.student_portal_status == 'yes'">
+                                                                            <div class="alert alert-success d-flex align-items-center py-2 mb-2">
+                                                                                <i class="fa fa-check-circle fa-lg me-2"></i>
+                                                                                <div>
+                                                                                    <strong>You have agreed</strong> to proceed with this program.
+                                                                                    <t t-if="program.student_agreed_date">
+                                                                                        <span class="text-muted ms-2 small">
+                                                                                            (on <t t-esc="program.student_agreed_date.strftime('%d %b, %Y')" />)
+                                                                                        </span>
+                                                                                    </t>
+                                                                                </div>
+                                                                            </div>
+                                                                        </t>
+                                                                        <t t-elif="program.student_portal_status == 'no'">
+                                                                            <div class="alert alert-danger d-flex align-items-start py-2 mb-2">
+                                                                                <i class="fa fa-times-circle fa-lg me-2 mt-1"></i>
+                                                                                <div>
+                                                                                    <strong>You have disagreed</strong> with this program.
+                                                                                    <t t-if="program.student_disagree_reason">
+                                                                                        <div class="mt-1 small">
+                                                                                            <strong>Reason:</strong>
+                                                                                            <span t-esc="program.student_disagree_reason" />
+                                                                                        </div>
+                                                                                    </t>
+                                                                                </div>
+                                                                            </div>
+                                                                        </t>
+                                                                        <t t-else="">
+                                                                            <div class="alert alert-warning d-flex align-items-center py-2 mb-2">
+                                                                                <i class="fa fa-clock-o fa-lg me-2"></i>
+                                                                                <div><strong>Awaiting your decision</strong> — Please let us know if you wish to proceed.</div>
+                                                                            </div>
+                                                                        </t>
+
+                                                                        <!-- ══ YES / NO OPTIONS (from DB, type yes or no) ══════════════ -->
+                                                                        <!-- Show form only when no yes/no decision yet -->
+                                                                        <t t-set="yn_options" t-value="response_options.filtered(lambda o: o.type in ('yes','no'))"/>
+                                                                        <t t-set="neutral_options" t-value="response_options.filtered(lambda o: o.type == 'neutral')"/>
+
+                                                                        <t t-if="not program.student_portal_status and yn_options">
+                                                                            <form t-attf-id="agreeForm{{program.id}}"
+                                                                                  action="/my/program/respond"
+                                                                                  method="post"
+                                                                                  class="o_portal_program_agree_form"
+                                                                                  t-attf-onsubmit="return portalValidateForm('{{program.id}}')">
+                                                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                                <input type="hidden" name="program_id" t-att-value="program.id"/>
+                                                                                <input type="hidden" name="option_id" t-attf-id="hiddenOptionId{{program.id}}" value=""/>
+
+                                                                                <!-- Dynamic Yes/No buttons -->
+                                                                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                                                                    <t t-foreach="yn_options" t-as="opt">
+                                                                                        <button type="button"
+                                                                                            t-attf-class="btn px-4 {{ 'btn-outline-success' if opt.type == 'yes' else 'btn-outline-danger' }}"
+                                                                                            t-att-data-optid="opt.id"
+                                                                                            t-att-data-opttype="opt.type"
+                                                                                            t-att-data-require="'1' if opt.require_comment else '0'"
+                                                                                            t-attf-data-pid="{{program.id}}"
+                                                                                            onclick="portalSelectOption(this)">
+                                                                                            <i t-attf-class="fa {{ 'fa-thumbs-up' if opt.type == 'yes' else 'fa-thumbs-down' }} me-1"></i>
+                                                                                            <t t-esc="opt.name"/>
+                                                                                        </button>
+                                                                                    </t>
+                                                                                </div>
+
+                                                                                <!-- Comment box (shown after any button click) -->
+                                                                                <div t-attf-id="commentBlock{{program.id}}" style="display:none;" class="mb-3">
+                                                                                    <label class="form-label fw-semibold">
+                                                                                        <i class="fa fa-pencil me-1"></i>
+                                                                                        Your comment: <span t-attf-id="commentRequired{{program.id}}" class="text-danger" style="display:none;">*</span>
+                                                                                    </label>
+                                                                                    <textarea name="comment"
+                                                                                              t-attf-id="commentText{{program.id}}"
+                                                                                              class="form-control" rows="3"
+                                                                                              placeholder="e.g. I am not interested in this program, or I prefer a different course..."></textarea>
+                                                                                    <div class="form-text text-muted">Your comment will be recorded and visible to the admissions team.</div>
+                                                                                </div>
+
+                                                                                <!-- Submit / Cancel -->
+                                                                                <div t-attf-id="submitBlock{{program.id}}" style="display:none;">
+                                                                                    <button type="submit" class="btn btn-primary px-4">
+                                                                                        <i class="fa fa-paper-plane me-1"></i> Submit Response
+                                                                                    </button>
+                                                                                    <button type="button" class="btn btn-link text-muted ms-2"
+                                                                                            t-attf-data-pid="{{program.id}}"
+                                                                                            onclick="portalCancelForm(this)">
+                                                                                        Cancel
+                                                                                    </button>
+                                                                                </div>
+                                                                            </form>
+                                                                        </t>
+
+                                                                        <!-- "Changed your mind?" for already yes/no decided -->
+                                                                        <t t-if="program.student_portal_status in ('yes', 'no') and yn_options">
+                                                                            <p class="mt-1 mb-2">
+                                                                                <small class="text-muted">Changed your mind?
+                                                                                    <a href="#" t-attf-onclick="portalShowChangeForm('{{program.id}}'); return false;" class="text-danger ms-1">
+                                                                                        <i class="fa fa-edit me-1"></i>Update your decision
+                                                                                    </a>
+                                                                                </small>
+                                                                            </p>
+                                                                            <!-- Hidden change form -->
+                                                                            <div t-attf-id="changeFormBlock{{program.id}}" style="display:none;" class="mt-2">
+                                                                                <form t-attf-id="agreeForm{{program.id}}"
+                                                                                      action="/my/program/respond"
+                                                                                      method="post"
+                                                                                      class="o_portal_program_agree_form"
+                                                                                      t-attf-onsubmit="return portalValidateForm('{{program.id}}')">
+                                                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                                    <input type="hidden" name="program_id" t-att-value="program.id"/>
+                                                                                    <input type="hidden" name="option_id" t-attf-id="hiddenOptionId{{program.id}}" value=""/>
+                                                                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                                                                        <t t-foreach="yn_options" t-as="opt">
+                                                                                            <button type="button"
+                                                                                                t-attf-class="btn px-4 {{ 'btn-outline-success' if opt.type == 'yes' else 'btn-outline-danger' }}"
+                                                                                                t-att-data-optid="opt.id"
+                                                                                                t-att-data-opttype="opt.type"
+                                                                                                t-att-data-require="'1' if opt.require_comment else '0'"
+                                                                                                t-attf-data-pid="{{program.id}}"
+                                                                                                onclick="portalSelectOption(this)">
+                                                                                                <i t-attf-class="fa {{ 'fa-thumbs-up' if opt.type == 'yes' else 'fa-thumbs-down' }} me-1"></i>
+                                                                                                <t t-esc="opt.name"/>
+                                                                                            </button>
+                                                                                        </t>
+                                                                                    </div>
+                                                                                    <div t-attf-id="commentBlock{{program.id}}" style="display:none;" class="mb-3">
+                                                                                        <label class="form-label fw-semibold">
+                                                                                            <i class="fa fa-pencil me-1"></i>
+                                                                                            Your comment: <span t-attf-id="commentRequired{{program.id}}" class="text-danger" style="display:none;">*</span>
+                                                                                        </label>
+                                                                                        <textarea name="comment"
+                                                                                                  t-attf-id="commentText{{program.id}}"
+                                                                                                  class="form-control" rows="3"
+                                                                                                  placeholder="e.g. I am not interested in this program, or I prefer a different course..."></textarea>
+                                                                                        <div class="form-text text-muted">Your comment will be recorded and visible to the admissions team.</div>
+                                                                                    </div>
+                                                                                    <div t-attf-id="submitBlock{{program.id}}" style="display:none;">
+                                                                                        <button type="submit" class="btn btn-primary px-4">
+                                                                                            <i class="fa fa-paper-plane me-1"></i> Submit Response
+                                                                                        </button>
+                                                                                        <button type="button" class="btn btn-link text-muted ms-2"
+                                                                                                t-attf-data-pid="{{program.id}}"
+                                                                                                onclick="portalCancelForm(this)">
+                                                                                            Cancel
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </form>
+                                                                            </div>
+                                                                        </t>
+
+                                                                        <!-- ══ NEUTRAL OPTIONS (always visible) ════════════════════════ -->
+                                                                        <t t-if="neutral_options">
+                                                                            <div class="mt-3 pt-2 border-top">
+                                                                                <p class="text-muted small mb-2">
+                                                                                    <i class="fa fa-comment-o me-1"></i>
+                                                                                    <strong>Additional comments:</strong>
+                                                                                </p>
+                                                                                <t t-foreach="neutral_options" t-as="nopt">
+                                                                                    <form t-attf-id="neutralForm{{program.id}}_{{nopt.id}}"
+                                                                                          action="/my/program/respond"
+                                                                                          method="post"
+                                                                                          class="mb-2"
+                                                                                          t-attf-onsubmit="return portalValidateNeutralForm('{{program.id}}', '{{nopt.id}}', {{1 if nopt.require_comment else 0}})">
+                                                                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                                        <input type="hidden" name="program_id" t-att-value="program.id"/>
+                                                                                        <input type="hidden" name="option_id" t-att-value="nopt.id"/>
+
+                                                                                        <!-- Button to toggle comment box -->
+                                                                                        <button type="button"
+                                                                                                class="btn btn-outline-secondary px-4"
+                                                                                                t-att-data-noptid="nopt.id"
+                                                                                                t-attf-data-pid="{{program.id}}"
+                                                                                                onclick="portalToggleNeutral(this)">
+                                                                                            <i class="fa fa-comment-o me-1"></i>
+                                                                                            <t t-esc="nopt.name"/>
+                                                                                        </button>
+
+                                                                                        <!-- Comment box (hidden until button click) -->
+                                                                                        <div t-attf-id="neutralComment{{program.id}}_{{nopt.id}}" style="display:none;" class="mt-2">
+                                                                                            <textarea name="comment"
+                                                                                                      t-attf-id="neutralText{{program.id}}_{{nopt.id}}"
+                                                                                                      class="form-control mb-2" rows="3"
+                                                                                                      placeholder="e.g. I am not interested in this program, or I prefer a different course..."></textarea>
+                                                                                            <button type="submit" class="btn btn-secondary btn-sm px-3">
+                                                                                                <i class="fa fa-paper-plane me-1"></i> Submit
+                                                                                            </button>
+                                                                                            <button type="button" class="btn btn-link btn-sm text-muted ms-1"
+                                                                                                    t-att-data-noptid="nopt.id"
+                                                                                                    t-attf-data-pid="{{program.id}}"
+                                                                                                    onclick="portalToggleNeutral(this)">
+                                                                                                Cancel
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </form>
+                                                                                </t>
+                                                                            </div>
+                                                                        </t>
+
+                                                                    </div>
+
+                                                                    <!-- Discussion / Chatter -->
+                                                                    <div class="mt-4 border-top pt-3">
+                                                                        <h6>Discussion</h6>
+                                                                        <t t-call="portal.message_thread">
+                                                                            <t t-set="object" t-value="program" />
+                                                                            <t t-set="enable_composer" t-value="True" />
+                                                                        </t>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button"
+                                                                        class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">
+                                                                        Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="text-center py-5">
+                                        <i class="fa fa-folder-open fa-4x text-muted mb-3"></i>
+                                        <h5 class="text-muted">No Programs Found</h5>
+                                        <p class="text-muted">You haven't applied to any programs
+                                            yet.</p>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+
+        <!-- JavaScript for dynamic response options -->
+        <script type="text/javascript">
+
+            /* ── portalSelectOption ─────────────────────────────────────────
+               Called by Yes/No option buttons (type yes or no).
+               Shows comment box + submit row for the current form.
+            ─────────────────────────────────────────────────────────────── */
+            function portalSelectOption(btn) {
+                var pid     = btn.getAttribute('data-pid');
+                var optId   = btn.getAttribute('data-optid');
+                var require = btn.getAttribute('data-require') === '1';
+
+                var hiddenOptId  = document.getElementById('hiddenOptionId' + pid);
+                var commentBlock = document.getElementById('commentBlock'   + pid);
+                var commentText  = document.getElementById('commentText'    + pid);
+                var commentReq   = document.getElementById('commentRequired'+ pid);
+                var submitBlock  = document.getElementById('submitBlock'    + pid);
+
+                if (!hiddenOptId || !commentBlock || !commentText || !submitBlock) {
+                    console.error('[portalSelectOption] Element(s) missing for pid=' + pid);
+                    return;
+                }
+
+                // Set hidden option_id
+                hiddenOptId.value = optId;
+
+                // Highlight chosen button — use data-pid to scope, not closest('form')
+                document.querySelectorAll('[data-optid][data-pid="' + pid + '"]').forEach(function(b) {
+                    b.classList.remove('active', 'fw-bold');
+                });
+                btn.classList.add('active', 'fw-bold');
+
+                // Show comment box always; mark required if needed
+                commentBlock.style.display = 'block';
+                if (require) {
+                    commentText.setAttribute('required', 'required');
+                    if (commentReq) commentReq.style.display = 'inline';
+                } else {
+                    commentText.removeAttribute('required');
+                    if (commentReq) commentReq.style.display = 'none';
+                }
+                commentText.focus();
+
+                // Show submit row
+                submitBlock.style.display = 'block';
+            }
+
+            /* ── portalCancelForm ───────────────────────────────────────── */
+            function portalCancelForm(btn) {
+                var pid = btn.getAttribute('data-pid');
+
+                var hiddenOptId  = document.getElementById('hiddenOptionId' + pid);
+                var commentBlock = document.getElementById('commentBlock'   + pid);
+                var commentText  = document.getElementById('commentText'    + pid);
+                var commentReq   = document.getElementById('commentRequired'+ pid);
+                var submitBlock  = document.getElementById('submitBlock'    + pid);
+
+                if (hiddenOptId)  hiddenOptId.value = '';
+                document.querySelectorAll('[data-optid][data-pid="' + pid + '"]').forEach(function(b) {
+                    b.classList.remove('active', 'fw-bold');
+                });
+                if (commentBlock) commentBlock.style.display = 'none';
+                if (submitBlock)  submitBlock.style.display  = 'none';
+                if (commentText)  { commentText.value = ''; commentText.removeAttribute('required'); commentText.classList.remove('is-invalid'); }
+                if (commentReq)   commentReq.style.display = 'none';
+            }
+
+            /* ── portalShowChangeForm ────────────────────────────────────── */
+            function portalShowChangeForm(pid) {
+                var block = document.getElementById('changeFormBlock' + pid);
+                if (block) block.style.display = 'block';
+            }
+
+            /* ── portalToggleNeutral ─────────────────────────────────────
+               Toggles the comment box for a neutral option button.
+               Same button click shows and hides (toggle).
+            ─────────────────────────────────────────────────────────────── */
+            function portalToggleNeutral(btn) {
+                var pid    = btn.getAttribute('data-pid');
+                var noptId = btn.getAttribute('data-noptid');
+                var block  = document.getElementById('neutralComment' + pid + '_' + noptId);
+                var text   = document.getElementById('neutralText'    + pid + '_' + noptId);
+
+                if (!block) return;
+                if (block.style.display === 'none' || block.style.display === '') {
+                    block.style.display = 'block';
+                    if (text) text.focus();
+                } else {
+                    block.style.display = 'none';
+                    if (text) text.value = '';
+                }
+            }
+
+            /* ── portalValidateForm ─────────────────────────────────────
+               onsubmit validator for Yes/No forms.
+            ─────────────────────────────────────────────────────────────── */
+            function portalValidateForm(pid) {
+                var hiddenOptId = document.getElementById('hiddenOptionId' + pid);
+                var commentText = document.getElementById('commentText'    + pid);
+
+                if (!hiddenOptId || !hiddenOptId.value) {
+                    alert('Please select an option before submitting.');
+                    return false;
+                }
+                if (commentText &amp;&amp; commentText.hasAttribute('required') &amp;&amp; !commentText.value.trim()) {
+                    commentText.classList.add('is-invalid');
+                    commentText.focus();
+                    alert('Please provide a comment before submitting.');
+                    return false;
+                }
+                if (commentText) commentText.classList.remove('is-invalid');
+                return true;
+            }
+
+            /* ── portalValidateNeutralForm ──────────────────────────────
+               onsubmit validator for neutral option forms.
+            ─────────────────────────────────────────────────────────────── */
+            function portalValidateNeutralForm(pid, noptId, requireComment) {
+                if (!requireComment) return true;
+                var text = document.getElementById('neutralText' + pid + '_' + noptId);
+                if (!text || !text.value.trim()) {
+                    if (text) { text.classList.add('is-invalid'); text.focus(); }
+                    alert('Please provide a comment before submitting.');
+                    return false;
+                }
+                if (text) text.classList.remove('is-invalid');
+                return true;
+            }
+
+        </script>
+    </template>
+</odoo>

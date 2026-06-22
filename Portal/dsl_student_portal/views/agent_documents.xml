@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Agent Documents Template -->
+    <template id="agent_documents" name="Agent Documents">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'documents'" />
+            <div class="container-fluid">
+                <div class="row">
+                    <t t-call="dsl_student_portal.agent_sidebar"/>
+                    <div class="col-lg-9 col-md-8 col-12 document-portal-container">
+                <!-- Page Header -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-gradient-info text-white border-0">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap">
+                            <div class="d-flex align-items-center mb-2 mb-md-0">
+                                <i class="fa fa-folder-open fa-2x me-3"></i>
+                                <div>
+                                    <h4 class="mb-0 text-white">Student Documents</h4>
+                                    <small class="text-white-50">Manage documents for all your students</small>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <span class="badge bg-danger-soft">
+                                    <i class="fa fa-exclamation-circle"></i>
+                                    <t t-esc="not_received_count"/> Not Received
+                                </span>
+                                <span class="badge bg-info-soft">
+                                    <i class="fa fa-clock-o"></i>
+                                    <t t-esc="received_count"/> Received
+                                </span>
+                                <span class="badge bg-warning-soft">
+                                    <i class="fa fa-check"></i>
+                                    <t t-esc="ready_count"/> Ready
+                                </span>
+                                <span class="badge bg-success-soft">
+                                    <i class="fa fa-check-circle"></i>
+                                    <t t-esc="submit_count"/> Submitted
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <t t-if="success">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fa fa-check-circle me-2"></i>
+                        <t t-esc="success" />
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </t>
+                <t t-if="error">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fa fa-exclamation-triangle me-2"></i>
+                        <t t-esc="error" />
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </t>
+
+                <!-- Filter Section -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h6 class="mb-3">
+                            <i class="fa fa-filter me-2"></i>Filters
+                        </h6>
+                        <div class="row g-3">
+                            <!-- Student Filter -->
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted mb-1">Filter by Student</label>
+                                <select class="form-select form-select-sm" 
+                                        onchange="window.location.href='/my/documents?student_id='+this.value+window.location.search.replace(/[?&amp;]student_id=[^&amp;]*/g,'').replace('?','&amp;')">
+                                    <option value="all">All Students</option>
+                                    <t t-foreach="students" t-as="student">
+                                        <option t-att-value="student.id" t-att-selected="'selected' if str(student.id) == student_filter else None">
+                                            <t t-esc="student.name"/> (<t t-esc="student.student_id_string"/>)
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted mb-1">Filter by Status</label>
+                                <select class="form-select form-select-sm" t-attf-onchange="window.location.href='/my/documents?state='+this.value+'&amp;priority={{priority_filter}}&amp;student_id={{student_filter}}'">
+                                    <option value="all" t-att-selected="state_filter == 'all'">All</option>
+                                    <option value="not_received" t-att-selected="state_filter == 'not_received'">Not Received</option>
+                                    <option value="received" t-att-selected="state_filter == 'received'">Received</option>
+                                    <option value="ready" t-att-selected="state_filter == 'ready'">Ready</option>
+                                    <option value="submit" t-att-selected="state_filter == 'submit'">Submitted</option>
+                                </select>
+                            </div>
+
+                            <!-- Priority Filter -->
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted mb-1">Filter by Priority</label>
+                                <select class="form-select form-select-sm" t-attf-onchange="window.location.href='/my/documents?state={{state_filter}}&amp;priority='+this.value+'&amp;student_id={{student_filter}}'">
+                                    <option value="all" t-att-selected="priority_filter == 'all'">All</option>
+                                    <option value="required" t-att-selected="priority_filter == 'required'">Required</option>
+                                    <option value="optional" t-att-selected="priority_filter == 'optional'">Optional</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Active Filters Display -->
+                        <t t-if="state_filter != 'all' or priority_filter != 'all' or student_filter != 'all'">
+                            <div class="mt-3 pt-3 border-top">
+                                <small class="text-muted">Active filters:</small>
+                                <t t-if="student_filter != 'all'">
+                                    <span class="badge bg-primary ms-1">
+                                        Student: <t t-esc="students.filtered(lambda s: str(s.id) == student_filter).name if students.filtered(lambda s: str(s.id) == student_filter) else 'Unknown'"/>
+                                        <a t-attf-href="/my/documents?state={{state_filter}}&amp;priority={{priority_filter}}" class="text-white ms-1">×</a>
+                                    </span>
+                                </t>
+                                <t t-if="state_filter != 'all'">
+                                    <span class="badge bg-primary ms-1">
+                                        Status: <t t-esc="state_filter.replace('_', ' ').title()"/>
+                                        <a t-attf-href="/my/documents?priority={{priority_filter}}&amp;student_id={{student_filter}}" class="text-white ms-1">×</a>
+                                    </span>
+                                </t>
+                                <t t-if="priority_filter != 'all'">
+                                    <span class="badge bg-primary ms-1">
+                                        Priority: <t t-esc="priority_filter.title()"/>
+                                        <a t-attf-href="/my/documents?state={{state_filter}}&amp;student_id={{student_filter}}" class="text-white ms-1">×</a>
+                                    </span>
+                                </t>
+                                <a href="/my/documents" class="btn btn-sm btn-link text-decoration-none ms-2">Clear all</a>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Document List -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <t t-if="documents">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle document-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 3%;">#</th>
+                                            <th style="width: 15%;">Student</th>
+                                            <th style="width: 18%;">Document Type</th>
+                                            <th style="width: 12%;">Reference</th>
+                                            <th style="width: 10%;">Sponsor</th>
+                                            <th style="width: 8%;">Priority</th>
+                                            <th style="width: 10%;">Due Date</th>
+                                            <th style="width: 12%;">Status</th>
+                                            <th style="width: 12%;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="documents" t-as="doc">
+                                            <tr t-attf-class="{{ 'table-danger-light' if doc.is_overdue else '' }}">
+                                                <td class="text-muted">
+                                                    <t t-esc="doc_index + 1"/>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <strong t-esc="doc.student_name or (doc.sponsor_name and doc.sponsor_id.student_id.name) or 'N/A'"/>
+                                                        <br/>
+                                                        <small class="text-muted">
+                                                            <t t-esc="doc.student_id.student_id_string or (doc.sponsor_id and doc.sponsor_id.student_id.student_id_string) or '-'"/>
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fa fa-file-text-o fa-lg text-primary me-2"></i>
+                                                        <div>
+                                                            <strong t-esc="doc.document_type_id.name or 'N/A'"/>
+                                                            <t t-if="doc.has_attachment">
+                                                                <br/>
+                                                                <small class="text-muted">
+                                                                    <i class="fa fa-paperclip"></i>
+                                                                    <t t-esc="doc.file_name"/>
+                                                                </small>
+                                                            </t>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <t t-if="doc.reference">
+                                                        <small class="text-muted" t-esc="doc.reference"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted">-</span>
+                                                    </t>
+                                                </td>
+                                                <td>
+                                                    <t t-if="doc.sponsor_name">
+                                                        <small class="badge bg-info-soft">
+                                                            <i class="fa fa-user"></i>
+                                                            <t t-esc="doc.sponsor_name"/>
+                                                        </small>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted">-</span>
+                                                    </t>
+                                                </td>
+                                                <td>
+                                                    <span t-attf-class="badge {{
+                                                        'bg-primary' if doc.priority == 'required' else 'bg-secondary'
+                                                    }}">
+                                                        <i t-attf-class="fa {{
+                                                            'fa-star' if doc.priority == 'required' else 'fa-circle-o'
+                                                        }} me-1"></i>
+                                                        <t t-esc="doc.priority.title()"/>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <t t-if="doc.due_date">
+                                                        <div t-attf-class="{{
+                                                            'text-danger fw-bold' if doc.is_overdue else 'text-muted'
+                                                        }}">
+                                                            <small t-esc="doc.due_date.strftime('%d %b, %Y')"/>
+                                                            <t t-if="doc.is_overdue">
+                                                                <br/><i class="fa fa-exclamation-triangle"></i> Overdue
+                                                            </t>
+                                                        </div>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted">-</span>
+                                                    </t>
+                                                </td>
+                                                <td>
+                                                    <span t-attf-class="badge {{
+                                                        'bg-danger' if doc.state == 'not_received' else
+                                                        'bg-info' if doc.state == 'received' else
+                                                        'bg-warning text-dark' if doc.state == 'ready' else
+                                                        'bg-success'
+                                                    }}">
+                                                        <i t-attf-class="fa {{
+                                                            'fa-times-circle' if doc.state == 'not_received' else
+                                                            'fa-clock-o' if doc.state == 'received' else
+                                                            'fa-check' if doc.state == 'ready' else
+                                                            'fa-check-circle'
+                                                        }} me-1"></i>
+                                                        <t t-if="doc.state == 'not_received'">Not Received</t>
+                                                        <t t-elif="doc.state == 'received'">Received</t>
+                                                        <t t-elif="doc.state == 'ready'">Ready</t>
+                                                        <t t-else="">Submitted</t>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <!-- Download button for agents -->
+                                                    <t t-if="doc.has_attachment">
+                                                        <a t-attf-href="/my/document/download/{{doc.id}}"
+                                                           class="btn btn-sm btn-outline-success">
+                                                            <i class="fa fa-download"></i> Download
+                                                        </a>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted small">No file</span>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Summary Dashboard -->
+                            <div class="mt-4 p-4 bg-light rounded">
+                                <h6 class="mb-3">
+                                    <i class="fa fa-chart-bar me-2"></i>Document Statistics
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-6 col-md-2">
+                                        <div class="text-center p-3 bg-white rounded shadow-sm">
+                                            <h4 class="text-primary mb-1" t-esc="len(documents)"/>
+                                            <small class="text-muted">Total</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-2">
+                                        <div class="text-center p-3 bg-white rounded shadow-sm">
+                                            <h4 class="text-danger mb-1" t-esc="required_count"/>
+                                            <small class="text-muted">Required</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-2">
+                                        <div class="text-center p-3 bg-white rounded shadow-sm">
+                                            <h4 class="text-danger mb-1" t-esc="not_received_count"/>
+                                            <small class="text-muted">Not Received</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-2">
+                                        <div class="text-center p-3 bg-white rounded shadow-sm">
+                                            <h4 class="text-info mb-1" t-esc="received_count"/>
+                                            <small class="text-muted">Received</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-2">
+                                        <div class="text-center p-3 bg-white rounded shadow-sm">
+                                            <h4 class="text-success mb-1" t-esc="submit_count + ready_count"/>
+                                            <small class="text-muted">Ready/Submitted</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-2">
+                                        <div class="text-center p-3 bg-white rounded shadow-sm">
+                                            <h4 t-attf-class="mb-1 {{ 'text-danger' if overdue_count > 0 else 'text-success' }}"
+                                                t-esc="overdue_count"/>
+                                            <small class="text-muted">Overdue</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Progress Bar -->
+                                <t t-if="len(documents) > 0">
+                                    <div class="mt-4">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <small class="text-muted">Overall Progress</small>
+                                            <small class="text-muted fw-bold">
+                                                <t t-esc="int((submit_count + ready_count) * 100 / len(documents))"/>%
+                                            </small>
+                                        </div>
+                                        <div class="progress" style="height: 25px;">
+                                            <div class="progress-bar bg-success"
+                                                 role="progressbar"
+                                                 t-attf-style="width: {{(submit_count * 100 / len(documents))}}%">
+                                                <t t-if="submit_count > 0">
+                                                    <t t-esc="int(submit_count * 100 / len(documents))"/>% Submitted
+                                                </t>
+                                            </div>
+                                            <div class="progress-bar bg-warning"
+                                                 role="progressbar"
+                                                 t-attf-style="width: {{(ready_count * 100 / len(documents))}}%">
+                                                <t t-if="ready_count > 0">
+                                                    <t t-esc="int(ready_count * 100 / len(documents))"/>% Ready
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="text-center py-5">
+                                <i class="fa fa-folder-open-o fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">No documents found</h5>
+                                <p class="text-muted">
+                                    <t t-if="state_filter != 'all' or priority_filter != 'all' or student_filter != 'all'">
+                                        Try adjusting your filters or <a href="/my/documents">clear all filters</a>
+                                    </t>
+                                    <t t-else="">
+                                        No documents available for your students.
+                                    </t>
+                                </p>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

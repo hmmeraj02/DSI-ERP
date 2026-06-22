@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="agent_profile" name="Agent Profile">
+        <t t-call="portal.portal_layout">
+            <div class="container-fluid py-4">
+                <div class="row">
+                    <!-- Left Sidebar -->
+                    <t t-call="dsl_student_portal.agent_sidebar"/>
+
+                    <!-- Main Content -->
+                    <div class="col-lg-9 col-md-8 col-12">
+                        <div class="container py-4" id="agent_profile_container">
+                            <!-- Success/Error Messages -->
+                            <t t-if="success">
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fa fa-check-circle me-2"></i>
+                                    <t t-esc="success" />
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+                            <t t-if="error">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fa fa-exclamation-circle me-2"></i>
+                                    <t t-esc="error" />
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+
+                            <!-- Page Header -->
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                                        <div class="d-flex align-items-center mb-3 mb-md-0">
+                                            <t t-if="agent.photo">
+                                                <img t-attf-src="data:image/png;base64,{{agent.photo.decode('utf-8')}}"
+                                                    class="rounded-circle me-3"
+                                                    style="width:80px;height:80px;object-fit:cover;border:3px solid #f0f0f0;"
+                                                    alt="Profile" />
+                                            </t>
+                                            <t t-else="">
+                                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/9e/Male_Avatar.jpg"
+                                                    class="rounded-circle me-3"
+                                                    style="width:80px;height:80px;object-fit:cover;"
+                                                    alt="Avatar" />
+                                            </t>
+                                            <div>
+                                                <h4 class="mb-1 text-capitalize" t-esc="agent.name" />
+                                                <p class="text-muted mb-1 small">
+                                                    <i class="fa fa-envelope me-1"></i>
+                                                    <t t-esc="agent.email" />
+                                                </p>
+                                                <p class="text-muted mb-0 small">
+                                                    <i class="fa fa-phone me-1"></i>
+                                                    <t t-esc="agent.mobile" />
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <button id="btnEditProfile" class="btn btn-primary">
+                                                <i class="fa fa-pencil me-1"></i> Edit Profile </button>
+                                            <div id="actionButtons" class="d-none">
+                                                <button type="submit" form="agent_profile_form"
+                                                    class="btn btn-success me-2">
+                                                    <i class="fa fa-save me-1"></i> Save Changes </button>
+                                                <button id="btnCancelEdit" type="button"
+                                                    class="btn btn-secondary">
+                                                    <i class="fa fa-times me-1"></i> Cancel </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Profile Form -->
+                            <form id="agent_profile_form" action="/my/profile/update" method="POST">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+
+                                <!-- Personal Information -->
+                                <div class="card shadow-sm border-0 mb-4">
+                                    <div class="card-header bg-white border-bottom">
+                                        <h5 class="mb-0"><i class="fa fa-id-card me-2 text-primary"></i>Personal Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control js-editable" name="first_name"
+                                                    t-att-value="agent.first_name" required="required" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">Middle Name</label>
+                                                <input type="text" class="form-control js-editable" name="middle_name"
+                                                    t-att-value="agent.middle_name or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control js-editable" name="last_name"
+                                                    t-att-value="agent.last_name" required="required" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">NID Number</label>
+                                                <input type="text" class="form-control js-editable" name="nid_no"
+                                                    t-att-value="agent.nid_no or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">Passport Number</label>
+                                                <input type="text" class="form-control js-editable" name="passport_no"
+                                                    t-att-value="agent.passport_no or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">Designation</label>
+                                                <input type="text" class="form-control js-editable" name="designation"
+                                                    t-att-value="agent.designation or ''" disabled="disabled" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contact Information -->
+                                <div class="card shadow-sm border-0 mb-4">
+                                    <div class="card-header bg-white border-bottom">
+                                        <h5 class="mb-0"><i class="fa fa-phone me-2 text-primary"></i>Contact Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                                                <input type="email" class="form-control js-editable" name="email"
+                                                    t-att-value="agent.email" required="required" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Mobile <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control js-editable" name="mobile"
+                                                    t-att-value="agent.mobile" required="required" disabled="disabled" />
+                                            </div>
+                                            <!-- <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Phone</label>
+                                                <input type="text" class="form-control js-editable" name="phone"
+                                                    t-att-value="agent.phone or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Website</label>
+                                                <input type="text" class="form-control js-editable" name="website"
+                                                    t-att-value="agent.website or ''" disabled="disabled" />
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Company Information -->
+                                <div class="card shadow-sm border-0 mb-4">
+                                    <div class="card-header bg-white border-bottom">
+                                        <h5 class="mb-0"><i class="fa fa-building me-2 text-primary"></i>Company Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Company Name</label>
+                                                <input type="text" class="form-control" 
+                                                    t-att-value="agent.agent_company_id.name or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Business Certificate</label>
+                                                <div t-if="agent.business_certificate">
+                                                    <a class="btn btn-outline-primary btn-sm" t-attf-href="/web/content/dsl.study.agent/#{agent.id}/business_certificate/Certificate" target="_blank">
+                                                        <i class="fa fa-download me-1"></i> Download Certificate
+                                                    </a>
+                                                </div>
+                                                <div t-else="">
+                                                    <span class="text-muted small">No certificate uploaded</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Address Information -->
+                                <div class="card shadow-sm border-0 mb-4">
+                                    <div class="card-header bg-white border-bottom">
+                                        <h5 class="mb-0"><i class="fa fa-map-marker me-2 text-primary"></i>Address</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-12">
+                                                <label class="form-label fw-semibold">Street</label>
+                                                <input type="text" class="form-control js-editable" name="street"
+                                                    t-att-value="agent.street or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label class="form-label fw-semibold">Street 2</label>
+                                                <input type="text" class="form-control js-editable" name="street2"
+                                                    t-att-value="agent.street2 or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">City</label>
+                                                <input type="text" class="form-control js-editable" name="city"
+                                                    t-att-value="agent.city or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">ZIP</label>
+                                                <input type="text" class="form-control js-editable" name="zip"
+                                                    t-att-value="agent.zip or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">State</label>
+                                                <select class="form-select js-editable" name="state_id" disabled="disabled">
+                                                    <option value="">-- Select --</option>
+                                                    <t t-foreach="states" t-as="state">
+                                                        <option t-att-value="state.id"
+                                                            t-att-selected="'selected' if agent.state_id and agent.state_id.id == state.id else None"
+                                                            t-esc="state.name" />
+                                                    </t>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">Country</label>
+                                                <select class="form-select js-editable" name="country_id" disabled="disabled">
+                                                    <option value="">-- Select --</option>
+                                                    <t t-foreach="countries" t-as="country">
+                                                        <option t-att-value="country.id"
+                                                            t-att-selected="'selected' if agent.country_id and agent.country_id.id == country.id else None"
+                                                            t-esc="country.name" />
+                                                    </t>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Social Media -->
+                                <!-- <div class="card shadow-sm border-0 mb-4">
+                                    <div class="card-header bg-white border-bottom">
+                                        <h5 class="mb-0"><i class="fa fa-share-alt me-2 text-primary"></i>Social Media</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold"><i class="fa fa-facebook-square me-1 text-primary"></i> Facebook</label>
+                                                <input type="text" class="form-control js-editable" name="facebook"
+                                                    t-att-value="agent.facebook or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold"><i class="fa fa-instagram me-1 text-danger"></i> Instagram</label>
+                                                <input type="text" class="form-control js-editable" name="instagram"
+                                                    t-att-value="agent.instagram or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold"><i class="fa fa-linkedin-square me-1 text-info"></i> LinkedIn</label>
+                                                <input type="text" class="form-control js-editable" name="linkedin"
+                                                    t-att-value="agent.linkedin or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold"><i class="fa fa-twitter-square me-1 text-info"></i> Twitter</label>
+                                                <input type="text" class="form-control js-editable" name="twitter"
+                                                    t-att-value="agent.twitter or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold"><i class="fa fa-skype me-1 text-info"></i> Skype ID</label>
+                                                <input type="text" class="form-control js-editable" name="skype_id"
+                                                    t-att-value="agent.skype_id or ''" disabled="disabled" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold"><i class="fa fa-whatsapp me-1 text-success"></i> WhatsApp ID</label>
+                                                <input type="text" class="form-control js-editable" name="whatsapp_id"
+                                                    t-att-value="agent.whatsapp_id or ''" disabled="disabled" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
+                            </form>
+
+                            <!-- ================================================ -->
+                            <!-- Contact Persons                                   -->
+                            <!-- ================================================ -->
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+                                    <h5 class="mb-0"><i class="fa fa-address-book me-2 text-primary"></i>Contact Persons</h5>
+                                </div>
+                                <div class="card-body p-0">
+
+                                    <!-- Existing linked contacts table -->
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0 align-middle">
+                                            <thead style="background:#f8f9fa;">
+                                                <tr>
+                                                    <th class="ps-3 py-3 text-muted fw-semibold" style="font-size:13px;">Name</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Designation</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Email</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Mobile</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="agent.contact_ids" t-as="contact">
+                                                    <tr>
+                                                        <td class="ps-3 py-2" style="font-size:13px;"><t t-esc="contact.name"/></td>
+                                                        <td class="py-2" style="font-size:13px;"><t t-esc="contact.x_designation or '—'"/></td>
+                                                        <td class="py-2" style="font-size:13px;"><t t-esc="contact.email or '—'"/></td>
+                                                        <td class="py-2" style="font-size:13px;"><t t-esc="contact.mobile or '—'"/></td>
+                                                        <td class="py-2">
+                                                            <form t-attf-action="/my/agent/contact/delete/#{contact.id}" method="POST" style="display:inline;">
+                                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                                                    style="font-size:12px;"
+                                                                    onclick="return confirm('Remove this contact person?')">
+                                                                    <i class="fa fa-trash me-1"></i>Remove
+                                                                </button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                                <t t-if="not agent.contact_ids">
+                                                    <tr id="no-contacts-row">
+                                                        <td colspan="5" class="text-center text-muted py-3" style="font-size:13px;">
+                                                            <i class="fa fa-info-circle me-1"></i>No contact persons added yet.
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Action buttons -->
+                                    <div class="px-3 py-3 border-top d-flex gap-2 flex-wrap">
+                                        <button type="button" id="btn-select-existing"
+                                            class="btn btn-sm btn-outline-secondary rounded-pill px-3" style="font-size:13px;">
+                                            <i class="fa fa-search me-1"></i> Select Existing Contact
+                                        </button>
+                                        <button type="button" id="btn-add-new-contact"
+                                            class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size:13px;">
+                                            <i class="fa fa-plus me-1"></i> Create New Contact
+                                        </button>
+                                    </div>
+
+                                    <!-- ── Panel A: Select Existing Partner ── -->
+                                    <div id="panel-select-existing" class="d-none px-3 pb-3 border-top pt-3">
+                                        <p class="text-muted small mb-2">Search an existing individual contact and link them:</p>
+                                        <form action="/my/agent/contact/link" method="POST" class="d-flex gap-2 flex-wrap align-items-end">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <div class="flex-grow-1" style="min-width:220px;">
+                                                <label class="form-label small fw-semibold mb-1">Search by Name / Email</label>
+                                                <input type="text" id="partner-search-input" class="form-control form-control-sm"
+                                                    placeholder="Type to search..." autocomplete="off"/>
+                                                <!-- Autocomplete dropdown -->
+                                                <div id="partner-search-results" class="list-group mt-1 shadow-sm"
+                                                    style="position:absolute;z-index:1000;min-width:280px;display:none;max-height:200px;overflow-y:auto;"></div>
+                                            </div>
+                                            <input type="hidden" name="partner_id" id="selected-partner-id"/>
+                                            <div>
+                                                <label class="form-label small fw-semibold mb-1">&#160;</label>
+                                                <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 d-block" style="font-size:13px;">
+                                                    <i class="fa fa-link me-1"></i> Link
+                                                </button>
+                                            </div>
+                                            <div>
+                                                <label class="form-label small fw-semibold mb-1">&#160;</label>
+                                                <button type="button" id="btn-cancel-select" class="btn btn-secondary btn-sm rounded-pill px-3 d-block" style="font-size:13px;">
+                                                    <i class="fa fa-times me-1"></i> Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- ── Panel B: Create New Contact ── -->
+                                    <div id="panel-new-contact" class="d-none px-3 pb-3 border-top pt-3">
+                                        <p class="text-muted small mb-2">Create a new contact person and link them:</p>
+                                        <form action="/my/agent/contact/add" method="POST">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <div class="row g-2">
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold mb-1">Name <span class="text-danger">*</span></label>
+                                                    <input type="text" name="contact_name" class="form-control form-control-sm" placeholder="Full Name" required="required"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold mb-1">Designation</label>
+                                                    <input type="text" name="contact_xdesignation" class="form-control form-control-sm" placeholder="e.g. Manager"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold mb-1">Email</label>
+                                                    <input type="email" name="contact_email" class="form-control form-control-sm" placeholder="email@example.com"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold mb-1">Mobile</label>
+                                                    <input type="text" name="contact_mobile" class="form-control form-control-sm" placeholder="+880..."/>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex gap-2 mt-3">
+                                                <button type="submit" class="btn btn-success btn-sm rounded-pill px-4" style="font-size:13px;">
+                                                    <i class="fa fa-save me-1"></i> Save Contact
+                                                </button>
+                                                <button type="button" id="btn-cancel-new" class="btn btn-secondary btn-sm rounded-pill px-3" style="font-size:13px;">
+                                                    <i class="fa fa-times me-1"></i> Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JavaScript for Edit Mode Toggle + Contact Persons -->
+            <script type="text/javascript">
+//<![CDATA[
+                document.addEventListener('DOMContentLoaded', function() {
+
+                    // ── Profile Edit Mode ────────────────────────────────────
+                    const form = document.getElementById('agent_profile_form');
+                    const editBtn = document.getElementById('btnEditProfile');
+                    const cancelBtn = document.getElementById('btnCancelEdit');
+                    const actionButtons = document.getElementById('actionButtons');
+
+                    function setMode(mode) {
+                        const fields = form.querySelectorAll('.js-editable');
+                        if (mode === 'edit') {
+                            fields.forEach(el => el.removeAttribute('disabled'));
+                            actionButtons.classList.remove('d-none');
+                            editBtn.classList.add('d-none');
+                        } else {
+                            fields.forEach(el => el.setAttribute('disabled', 'disabled'));
+                            actionButtons.classList.add('d-none');
+                            editBtn.classList.remove('d-none');
+                            if (mode === 'cancel') { location.reload(); }
+                        }
+                    }
+
+                    editBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        setMode('edit');
+                    });
+
+                    cancelBtn.addEventListener('click', function() {
+                        setMode('cancel');
+                    });
+
+                    // ── Contact Persons — Panel toggle & Autocomplete ────
+                    var btnSelectExisting = document.getElementById('btn-select-existing');
+                    var btnAddNew         = document.getElementById('btn-add-new-contact');
+                    var panelSelect       = document.getElementById('panel-select-existing');
+                    var panelNew          = document.getElementById('panel-new-contact');
+                    var btnCancelSelect   = document.getElementById('btn-cancel-select');
+                    var btnCancelNew      = document.getElementById('btn-cancel-new');
+                    var searchInput       = document.getElementById('partner-search-input');
+                    var searchResults     = document.getElementById('partner-search-results');
+                    var selectedPartnerId = document.getElementById('selected-partner-id');
+
+                    function closeAllPanels() {
+                        if (panelSelect) panelSelect.classList.add('d-none');
+                        if (panelNew)    panelNew.classList.add('d-none');
+                    }
+
+                    if (btnSelectExisting) {
+                        btnSelectExisting.addEventListener('click', function() {
+                            closeAllPanels();
+                            panelSelect.classList.remove('d-none');
+                            if (searchInput) searchInput.focus();
+                        });
+                    }
+
+                    if (btnAddNew) {
+                        btnAddNew.addEventListener('click', function() {
+                            closeAllPanels();
+                            panelNew.classList.remove('d-none');
+                        });
+                    }
+
+                    if (btnCancelSelect) {
+                        btnCancelSelect.addEventListener('click', function() {
+                            closeAllPanels();
+                            if (searchInput) searchInput.value = '';
+                            if (searchResults) searchResults.style.display = 'none';
+                            if (selectedPartnerId) selectedPartnerId.value = '';
+                        });
+                    }
+
+                    if (btnCancelNew) {
+                        btnCancelNew.addEventListener('click', function() { closeAllPanels(); });
+                    }
+
+                    // ── Autocomplete search for existing partners ─────────────
+                    var searchTimer = null;
+                    if (searchInput) {
+                        searchInput.addEventListener('input', function() {
+                            var q = this.value.trim();
+                            if (searchTimer) clearTimeout(searchTimer);
+                            if (q.length < 2) {
+                                searchResults.style.display = 'none';
+                                return;
+                            }
+                            searchTimer = setTimeout(function() {
+                                fetch('/my/agent/contact/search?q=' + encodeURIComponent(q))
+                                    .then(function(r) { return r.json(); })
+                                    .then(function(data) {
+                                        searchResults.innerHTML = '';
+                                        if (!data.length) {
+                                            searchResults.innerHTML = '<div class="list-group-item text-muted small">No results found</div>';
+                                        } else {
+                                            data.forEach(function(p) {
+                                                var item = document.createElement('button');
+                                                item.type = 'button';
+                                                item.className = 'list-group-item list-group-item-action py-2';
+                                                item.style.fontSize = '13px';
+                                                item.innerHTML = '<strong>' + p.name + '</strong>' +
+                                                    (p.email ? ' <span class="text-muted">&lt;' + p.email + '&gt;</span>' : '') +
+                                                    (p.mobile ? ' <span class="text-muted ms-1">&#128241;' + p.mobile + '</span>' : '');
+                                                item.addEventListener('click', function() {
+                                                    searchInput.value = p.name;
+                                                    selectedPartnerId.value = p.id;
+                                                    searchResults.style.display = 'none';
+                                                });
+                                                searchResults.appendChild(item);
+                                            });
+                                        }
+                                        searchResults.style.display = 'block';
+                                    })
+                                    .catch(function() { searchResults.style.display = 'none'; });
+                            }, 300);
+                        });
+
+                        // Hide results when clicking outside
+                        document.addEventListener('click', function(e) {
+                            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                                searchResults.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+//]]>
+            </script>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="student_notifications" name="My Notifications">
+        <t t-call="portal.portal_layout">
+            <div class="container py-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3>Notifications</h3>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- Tabs Navigation -->
+                        <ul class="nav nav-tabs mb-4" id="notificationTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active fw-bold" id="notices-tab" data-bs-toggle="tab" data-bs-target="#notices" type="button" role="tab" aria-controls="notices" aria-selected="true">
+                                    <i class="fa fa-bullhorn me-2"/>Notices 
+                                    <t t-if="unread_notices_count and unread_notices_count > 0">
+                                        <span class="badge bg-danger rounded-pill ms-1"><t t-esc="unread_notices_count"/></span>
+                                    </t>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold" id="invoices-tab" data-bs-toggle="tab" data-bs-target="#invoices" type="button" role="tab" aria-controls="invoices" aria-selected="false">
+                                    <i class="fa fa-file-invoice-dollar me-2"/>Invoices
+                                    <t t-if="unpaid_invoice_count and unpaid_invoice_count > 0">
+                                        <span class="badge bg-danger rounded-pill ms-1"><t t-esc="unpaid_invoice_count"/></span>
+                                    </t>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab" aria-controls="documents" aria-selected="false">
+                                    <i class="fa fa-folder-open me-2"/>Documents
+                                    <t t-if="(overdue_count or 0) + len(due_soon_documents or []) > 0">
+                                        <span class="badge bg-danger rounded-pill ms-1"><t t-esc="(overdue_count or 0) + len(due_soon_documents or [])"/></span>
+                                    </t>
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="notificationTabsContent">
+                            <!-- Notices Tab -->
+                            <div class="tab-pane fade show active" id="notices" role="tabpanel" aria-labelledby="notices-tab">
+                                <t t-if="notices">
+                                    <div class="list-group shadow-sm">
+                                        <t t-foreach="notices" t-as="notice">
+                                            <div class="list-group-item list-group-item-action flex-column align-items-start p-3 border-start-0 border-end-0 border-top-0 border-bottom">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1 text-primary">
+                                                        <t t-esc="notice.name"/>
+                                                    </h5>
+                                                    <small class="text-muted">
+                                                        <i class="fa fa-clock-o me-1"/>
+                                                        <span t-field="notice.create_date" t-options='{"format": "d MMMM, y h:mm a"}'/>
+                                                    </small>
+                                                </div>
+                                                <p class="mb-1 mt-2 text-muted">
+                                                    <t t-out="notice.description"/>
+                                                </p>
+                                                <t t-if="notice.attachment_ids">
+                                                    <div class="mt-2">
+                                                        <small class="text-muted fw-bold">Attachments:</small>
+                                                        <div class="d-flex flex-wrap gap-2 mt-1">
+                                                            <t t-foreach="notice.attachment_ids" t-as="att">
+                                                                <a t-attf-href="/web/content/{{att.id}}?download=true" target="_blank" class="badge bg-light text-dark border text-decoration-none p-2">
+                                                                    <i class="fa fa-paperclip me-1"/>
+                                                                    <t t-esc="att.name"/>
+                                                                </a>
+                                                            </t>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="text-center py-5 bg-white shadow-sm rounded">
+                                        <i class="fa fa-bell-slash fa-3x text-muted mb-3"/>
+                                        <h5 class="text-muted">No Notices Found</h5>
+                                    </div>
+                                </t>
+                            </div>
+                            
+                            <!-- Invoices Tab -->
+                            <div class="tab-pane fade" id="invoices" role="tabpanel" aria-labelledby="invoices-tab">
+                                <t t-if="unpaid_invoices">
+                                    <div class="list-group shadow-sm">
+                                        <t t-foreach="unpaid_invoices" t-as="inv">
+                                            <t t-set="is_due_soon" t-value="inv in due_soon_invoices"/>
+                                            <a t-attf-href="/my/invoices/{{inv.id}}" class="list-group-item list-group-item-action flex-column align-items-start p-3 border-start-0 border-end-0 border-top-0 border-bottom">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1 text-dark d-flex align-items-center">
+                                                        <t t-esc="inv.name"/>
+                                                        <t t-if="is_due_soon">
+                                                            <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">Due Soon</span>
+                                                        </t>
+                                                    </h5>
+                                                    <small t-attf-class="{{ 'text-danger fw-bold' if is_due_soon else 'text-muted' }}">
+                                                        Due: <span t-field="inv.invoice_date_due"/>
+                                                    </small>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                                    <span class="badge bg-secondary rounded-pill">
+                                                        Amount: <t t-esc="inv.amount_residual" t-options='{"widget": "monetary", "display_currency": inv.currency_id}'/>
+                                                    </span>
+                                                    <small class="text-muted">Status: <span t-field="inv.payment_state"/></small>
+                                                </div>
+                                            </a>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="text-center py-5 bg-white shadow-sm rounded">
+                                        <i class="fa fa-check-circle fa-3x text-success mb-3"/>
+                                        <h5 class="text-muted">No Unpaid Invoices</h5>
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Documents Tab -->
+                            <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+                                <t t-if="overdue_documents or due_soon_documents">
+                                    <div class="list-group shadow-sm">
+                                        <!-- Overdue Docs -->
+                                        <t t-foreach="overdue_documents" t-as="doc">
+                                            <a href="/my/documents?priority=all" class="list-group-item list-group-item-action flex-column align-items-start p-3 border-start-0 border-end-0 border-top-0 border-bottom">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1 text-danger">
+                                                        <i class="fa fa-folder-open me-2"/>
+                                                        <t t-esc="doc.document_type_id.name"/>
+                                                    </h5>
+                                                    <span class="badge bg-danger">Overdue</span>
+                                                </div>
+                                                <p class="mb-1 mt-2 text-dark">
+                                                    This document is required and needs to be submitted immediately.
+                                                </p>
+                                                <small class="text-danger fw-bold">Due: <span t-field="doc.due_date"/></small>
+                                            </a>
+                                        </t>
+                                        
+                                        <!-- Due Soon Docs -->
+                                        <t t-if="due_soon_documents">
+                                            <t t-foreach="due_soon_documents" t-as="doc">
+                                                <a href="/my/documents?priority=all" class="list-group-item list-group-item-action flex-column align-items-start p-3 border-start-0 border-end-0 border-top-0 border-bottom">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h5 class="mb-1 text-warning">
+                                                            <i class="fa fa-folder-open me-2"/>
+                                                            <t t-esc="doc.document_type_id.name"/>
+                                                        </h5>
+                                                        <span class="badge bg-warning text-dark">Due Soon</span>
+                                                    </div>
+                                                    <p class="mb-1 mt-2 text-dark">
+                                                        <t t-set="days_left" t-value="(doc.due_date - today).days"/>
+                                                        <t t-if="days_left == 0">This document is due today.</t>
+                                                        <t t-elif="days_left == 1">This document is due tomorrow.</t>
+                                                        <t t-else="">This document is due in <t t-esc="days_left"/> days.</t>
+                                                    </p>
+                                                    <small class="text-muted fw-bold">Due: <span t-field="doc.due_date"/></small>
+                                                </a>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="text-center py-5 bg-white shadow-sm rounded">
+                                        <i class="fa fa-check-circle fa-3x text-success mb-3"/>
+                                        <h5 class="text-muted">No Documents Attention Needed</h5>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

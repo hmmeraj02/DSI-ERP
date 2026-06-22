@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="student_invoices" name="Student Invoices">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'invoices'"/>
+            <div class="container-fluid py-4">
+                <div class="row">
+                    <!-- Left Sidebar -->
+                    <t t-call="dsl_student_portal.student_sidebar" />
+
+                    <!-- Main Content -->
+                    <div class="col-lg-9 col-md-8 col-12">
+
+                        <!-- Page Header -->
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fa fa-file-text fa-2x text-primary me-3"></i>
+                                <h4 class="mb-0">Invoices &amp; Bills</h4>
+                            </div>
+                        </div>
+
+                        <!-- Sort / Filter Bar
+                        <div class="d-flex justify-content-end mb-3 gap-2">
+                            <div class="input-group input-group-sm" style="width:auto;">
+                                <span class="input-group-text bg-white">Sort By:</span>
+                                <select class="form-select form-select-sm" id="sortInvoices" style="min-width:110px;">
+                                    <option value="date_desc" selected="">Date ↓</option>
+                                    <option value="date_asc">Date ↑</option>
+                                    <option value="due_asc">Due Date ↑</option>
+                                    <option value="amount_desc">Amount ↓</option>
+                                </select>
+                            </div>
+                            <div class="input-group input-group-sm" style="width:auto;">
+                                <span class="input-group-text bg-white">Filter By:</span>
+                                <select class="form-select form-select-sm" id="filterInvoices" style="min-width:110px;">
+                                    <option value="all" selected="">All</option>
+                                    <option value="unpaid">Unpaid</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="overdue">Overdue</option>
+                                </select>
+                            </div>
+                        </div> -->
+
+                        <!-- Invoices Table -->
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0 align-middle" id="invoiceTable">
+                                        <thead class="bg-light text-muted">
+                                            <tr>
+                                                <th class="ps-4">Invoice #</th>
+                                                <th>Description</th>
+                                                <th>Invoice Date</th>
+                                                <th>Due Date</th>
+                                                <th>Status</th>
+                                                <th class="text-end pe-4">Amount Due</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="invoices" t-as="invoice">
+                                                <tr t-attf-data-status="#{invoice.payment_state}">
+                                                    <td class="ps-4">
+                                                        <a t-attf-href="/my/invoices/#{invoice.id}" class="fw-bold text-primary">
+                                                            <t t-esc="invoice.name"/>
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <t t-foreach="invoice.invoice_line_ids.filtered(lambda l: l.display_type == 'product')" t-as="line">
+                                                            <div class="small"><t t-esc="line.name"/></div>
+                                                        </t>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="invoice.invoice_date">
+                                                            <t t-esc="invoice.invoice_date" t-options='{"widget": "date"}'/>
+                                                        </t>
+                                                        <t t-else="">-</t>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="invoice.invoice_date_due">
+                                                            <t t-esc="invoice.invoice_date_due" t-options='{"widget": "date"}'/>
+                                                        </t>
+                                                        <t t-else="">-</t>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="invoice.payment_state == 'paid'">
+                                                            <span class="badge rounded-pill px-3 py-2" style="background:#198754;">
+                                                                <i class="fa fa-check me-1"></i>Paid
+                                                            </span>
+                                                        </t>
+                                                        <t t-elif="invoice.payment_state in ('not_paid', 'partial') and invoice.invoice_date_due and invoice.invoice_date_due &lt; today">
+                                                            <span class="badge rounded-pill px-3 py-2 bg-danger">
+                                                                <i class="fa fa-clock-o me-1"></i>Overdue
+                                                            </span>
+                                                        </t>
+                                                        <t t-elif="invoice.payment_state in ('not_paid', 'partial')">
+                                                            <span class="badge rounded-pill px-3 py-2" style="background:#0d6efd;">
+                                                                <i class="fa fa-hourglass-half me-1"></i>Waiting for Payment
+                                                            </span>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span class="badge rounded-pill px-3 py-2 bg-secondary">
+                                                                <t t-esc="invoice.payment_state"/>
+                                                            </span>
+                                                        </t>
+                                                    </td>
+                                                    <td class="text-end pe-4 fw-bold">
+                                                        <t t-esc="invoice.amount_residual" t-options='{"widget": "monetary", "display_currency": invoice.currency_id}'/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                            <t t-if="not invoices">
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-5 text-muted">
+                                                        <i class="fa fa-file-text fa-3x mb-3 opacity-25"></i>
+                                                        <p class="mb-0">No invoices found.</p>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> <!-- Close col-lg-9 -->
+                </div> <!-- Close row -->
+            </div> <!-- Close container-fluid -->
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="student_sponsor" name="Student Sponsor">
+        <t t-call="portal.portal_layout">
+            <div class="row">
+                <!-- Sidebar -->
+                <t t-call="dsl_student_portal.student_sidebar"/>
+
+                <!-- Main Content -->
+                <div class="col-lg-9 col-md-8 col-12">
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="fa fa-users me-2 text-primary fs-4"></i>
+                        <h4 class="mb-0 fw-bold">My Sponsor</h4>
+                    </div>
+
+                    <t t-if="not sponsors">
+                        <div class="alert alert-info">
+                            <i class="fa fa-info-circle me-2"></i>No sponsor information found.
+                        </div>
+                    </t>
+
+                    <t t-foreach="sponsors" t-as="sponsor">
+                        <!-- Compute document status -->
+                        <t t-set="doc_lines" t-value="sponsor.document_line_ids"/>
+                        <t t-set="required_docs" t-value="doc_lines.filtered(lambda d: d.priority == 'required')"/>
+                        <t t-set="missing_count" t-value="len(required_docs.filtered(lambda d: d.state == 'not_received'))"/>
+                        <t t-set="received_count" t-value="len(required_docs.filtered(lambda d: d.state == 'received'))"/>
+                        <t t-set="total_required" t-value="len(required_docs)"/>
+
+                        <t t-set="doc_status_label" t-value="
+                            'Ready for Submission' if (total_required > 0 and missing_count == 0) else
+                            'Missing' if (total_required > 0 and missing_count == total_required) else
+                            'In-Progress' if total_required > 0 else
+                            'N/A'
+                        "/>
+                        <t t-set="doc_status_class" t-value="
+                            'success' if doc_status_label == 'Ready for Submission' else
+                            'danger'  if doc_status_label == 'Missing' else
+                            'warning' if doc_status_label == 'In-Progress' else
+                            'secondary'
+                        "/>
+
+                        <div class="card border-0 shadow-sm mb-4">
+                            <!-- Card Header -->
+                            <div class="card-header border-0 py-3"
+                                 style="background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="width:42px;height:42px;border-radius:50%;background:rgba(99,179,237,0.2);display:flex;align-items:center;justify-content:center;">
+                                            <i class="fa fa-user text-info"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 text-white fw-bold" t-esc="sponsor.name"/>
+                                            <small class="text-info opacity-75" t-esc="sponsor.code"/>
+                                        </div>
+                                    </div>
+                                    <span t-attf-class="badge bg-#{doc_status_class} fs-6 px-3 py-2">
+                                        <i class="fa fa-circle me-1" style="font-size:8px;"></i>
+                                        <t t-esc="doc_status_label"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="card-body p-4">
+                                <!-- Row 1: Name, Relation -->
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="text-muted small mb-1">Name</label>
+                                        <div class="fw-semibold" t-esc="sponsor.name"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="text-muted small mb-1">Relation</label>
+                                        <div class="fw-semibold" t-esc="sponsor.relationship_id.name or '-'"/>
+                                    </div>
+                                </div>
+
+                                <hr class="my-3"/>
+
+                                <!-- Row 2: Fund & Matured -->
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="text-muted small mb-1">Available Funds</label>
+                                        <t t-if="sponsor.available_fund_ids">
+                                            <div class="d-flex flex-column gap-1">
+                                                <t t-foreach="sponsor.available_fund_ids" t-as="fund">
+                                                    <span class="d-flex align-items-center gap-2">
+                                                        <i class="fa fa-university text-muted" style="font-size:12px;"></i>
+                                                        <span t-esc="fund.bank_name"/>
+                                                        <t t-if="fund.account_type_id">
+                                                            — <span class="text-muted small" t-esc="fund.account_type_id.name"/>
+                                                        </t>
+                                                        <t t-if="fund.amount">
+                                                            — <span class="text-muted small" t-esc="'{:,.2f}'.format(fund.amount)"/>
+                                                        </t>
+                                                        <t t-if="fund.mature_date">
+                                                            — <span class="text-muted small" t-esc="fund.mature_date.strftime('%d/%m/%Y')"/>
+                                                        </t>
+                                                    </span>
+                                                </t>
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="text-muted">-</span>
+                                        </t>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="text-muted small mb-1">Matured Funds</label>
+                                        <t t-set="matured_funds" t-value="sponsor.available_fund_ids.filtered(lambda f: f.state == 'matured')"/>
+                                        <t t-if="matured_funds">
+                                            <div class="d-flex flex-column gap-1">
+                                                <t t-foreach="matured_funds" t-as="fund">
+                                                    <span class="d-flex align-items-center gap-2">
+                                                        <i class="fa fa-check-circle text-success" style="font-size:12px;"></i>
+                                                        <span t-esc="fund.bank_name"/>
+                                                        <t t-if="fund.account_type_id">
+                                                            — <span class="text-muted small" t-esc="fund.account_type_id.name"/>
+                                                        </t>
+                                                        <t t-if="fund.amount">
+                                                            — <span class="text-muted small" t-esc="'{:,.2f}'.format(fund.amount)"/>
+                                                        </t>
+                                                        <t t-if="fund.mature_date">
+                                                            — <span class="text-muted small" t-esc="fund.mature_date.strftime('%d/%m/%Y')"/>
+                                                        </t>
+                                                    </span>
+                                                </t>
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="text-muted">-</span>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <hr class="my-3"/>
+
+                                <!-- Row 3: Income -->
+                                <div class="row g-3 mb-1">
+                                    <div class="col-12">
+                                        <label class="text-muted small mb-1">Income</label>
+                                        <t t-if="sponsor.income_ids">
+                                            <div class="d-flex flex-wrap gap-2 mt-1">
+                                                <t t-foreach="sponsor.income_ids" t-as="income">
+                                                    <span class="badge bg-light text-dark border px-3 py-2" style="font-size:0.8rem;">
+                                                        <i class="fa fa-briefcase me-1 text-muted"></i>
+                                                        <t t-esc="income.head_id.name or '-'"/>
+                                                        <t t-if="income.amount_month">
+                                                            &#160;&#8212;&#160;<t t-esc="'{:,.2f}'.format(income.amount_month)"/>/mo
+                                                        </t>
+                                                    </span>
+                                                </t>
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="text-muted">-</span>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

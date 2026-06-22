@@ -1,0 +1,644 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Agent Student Detail Template -->
+    <template id="agent_student_detail" name="Agent Student Detail">
+        <t t-call="portal.portal_layout">
+            <div class="container-fluid">
+                <div class="row">
+
+                    <!-- Left Sidebar (Reusable) -->
+                    <t t-call="dsl_student_portal.agent_sidebar"/>
+
+                    <!-- Main Content Area -->
+                    <div class="col-lg-9 col-md-8 col-12">
+                        <!-- Back Button and Header -->
+                        <div class="mb-4">
+                            <a href="/my/home" class="btn btn-outline-primary mb-3">
+                                <i class="fa fa-arrow-left me-1"></i> Back to Dashboard </a>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-user-circle fa-2x text-primary me-3"></i>
+                                    <div>
+                                        <h4 class="mb-0">Student Information</h4>
+                                        <p class="text-muted mb-0 small">Detailed view of student
+                                            profile and activities</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Student Profile Card with Photo -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <t t-if="student.photo">
+                                            <img
+                                                t-attf-src="data:image/png;base64,{{student.photo.decode('utf-8')}}"
+                                                class="rounded-circle"
+                                                style="width:80px;height:80px;object-fit:cover;border:3px solid #f0f0f0;"
+                                                alt="Student" />
+                                        </t>
+                                        <t t-else="">
+                                            <img
+                                                src="https://upload.wikimedia.org/wikipedia/commons/9/9e/Male_Avatar.jpg"
+                                                class="rounded-circle"
+                                                style="width:80px;height:80px;object-fit:cover;"
+                                                alt="Avatar" />
+                                        </t>
+                                    </div>
+                                    <div class="col">
+                                        <h4 class="mb-1 text-capitalize" t-esc="student.name" />
+                                        <p class="text-muted mb-1">
+                                            <i class="fa fa-id-card me-1"></i> Student ID: <span
+                                                t-esc="student.student_id_string or 'N/A'" />
+                                        </p>
+                                        <span
+                                            t-attf-class="badge bg-{{
+                                                'success' if student.state == 'done' else
+                                                'primary' if student.state == 'in_progress' else
+                                                'warning' if student.state in ['submitted', 'draft'] else
+                                                'danger' if student.state == 'cancelled' else
+                                                'info'
+                                            }}">
+                                            <t t-esc="student.state.replace('_', ' ').title()" />
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Statistics Cards -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <div class="card border-0 shadow-sm h-100"
+                                    style="background:linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-3">
+                                                <i class="fa fa-book fa-2x text-white opacity-75"></i>
+                                            </div>
+                                            <div class="col-9 text-end">
+                                                <h6 class="text-white mb-1">Programs</h6>
+                                                <h3 class="text-white mb-0 fw-bold"
+                                                    t-esc="len(student.program_ids)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <div class="card border-0 shadow-sm h-100"
+                                    style="background:linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-3">
+                                                <i
+                                                    class="fa fa-file-text fa-2x text-white opacity-75"></i>
+                                            </div>
+                                            <div class="col-9 text-end">
+                                                <h6 class="text-white mb-1">Documents</h6>
+                                                <h3 class="text-white mb-0 fw-bold"
+                                                    t-esc="len(student.document_line_ids)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <div class="card border-0 shadow-sm h-100"
+                                    style="background:linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-3">
+                                                <i
+                                                    class="fa fa-file-text fa-2x text-white opacity-75"></i>
+                                            </div>
+                                            <div class="col-9 text-end">
+                                                <h6 class="text-white mb-1">Invoices</h6>
+                                                <h3 class="text-white mb-0 fw-bold"
+                                                    t-esc="len(student.move_ids.filtered(lambda m: m.partner_id.id == student.partner_id.id))" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="col-lg-3 col-md-6 col-12">
+                                <div class="card border-0 shadow-sm h-100"
+                                    style="background:linear-gradient(135deg, #818cf8 0%, #4f46e5 100%);">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-3">
+                                                <i
+                                                    class="fa fa-language fa-2x text-white opacity-75"></i>
+                                            </div>
+                                            <div class="col-9 text-end">
+                                                <h6 class="text-white mb-1">Tests</h6>
+                                                <h3 class="text-white mb-0 fw-bold"
+                                                    t-esc="len(student.language_test_line_ids)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+
+                        <!-- Personal Information -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fa fa-user me-2"></i>Personal Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="text-muted small">Full Name</label>
+                                        <p class="fw-bold mb-0" t-esc="student.name" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="text-muted small">Date of Birth</label>
+                                        <p class="fw-bold mb-0" t-esc="student.date_of_birth or '-'" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="text-muted small">Gender</label>
+                                        <p class="fw-bold mb-0"
+                                            t-esc="student.gender.title() if student.gender else '-'" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="text-muted small">Blood Group</label>
+                                        <p class="fw-bold mb-0"
+                                            t-esc="student.blood_group.upper() if student.blood_group else '-'" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="text-muted small">Nationality</label>
+                                        <p class="fw-bold mb-0"
+                                            t-esc="student.nationality.name if student.nationality else '-'" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="text-muted small">Passport Number</label>
+                                        <p class="fw-bold mb-0"
+                                            t-esc="student.passport_number or '-'" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fa fa-phone me-2"></i>Contact Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="text-muted small">Email</label>
+                                        <p class="fw-bold mb-0">
+                                            <a t-attf-href="mailto:{{student.email}}"
+                                                t-esc="student.email or '-'" />
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="text-muted small">Mobile</label>
+                                        <p class="fw-bold mb-0">
+                                            <a t-attf-href="tel:{{student.mobile}}"
+                                                t-esc="student.mobile or '-'" />
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="text-muted small">Phone</label>
+                                        <p class="fw-bold mb-0" t-esc="student.phone or '-'" />
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="text-muted small">Address</label>
+                                        <p class="fw-bold mb-0">
+                                            <t
+                                                t-if="student.street or student.city or student.country_id">
+                                                <t t-esc="student.street or ''" />
+                                                <t t-if="student.street2">, <t
+                                                        t-esc="student.street2" /></t>
+                                                <t t-if="student.city">, <t t-esc="student.city" /></t>
+                                                <t t-if="student.state_id">, <t
+                                                        t-esc="student.state_id.name" /></t>
+                                                <t t-if="student.zip"> - <t t-esc="student.zip" /></t>
+                                                <t t-if="student.country_id">, <t
+                                                        t-esc="student.country_id.name" /></t>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Admission Officers -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fa fa-user-tie me-2"></i>Admission
+                                    Officers</h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="student.admission_officer_ids">
+                                    <div class="row g-3">
+                                        <t t-foreach="student.admission_officer_ids" t-as="officer">
+                                            <div class="col-md-6">
+                                                <div class="border rounded p-3 d-flex flex-column">
+                                                    <h6 class="mb-2" t-esc="officer.name" />
+                                                    <p class="small mb-1">
+                                                        <i class="fa fa-envelope text-muted me-1"></i>
+                                                        <t t-esc="officer.email or 'N/A'" />
+                                                    </p>
+                                                    <p class="small mb-2">
+                                                        <i class="fa fa-phone text-muted me-1"></i>
+                                                        <t t-esc="officer.mobile or officer.phone or 'N/A'" />
+                                                    </p>
+                                                    <div class="mt-auto pt-2 border-top">
+                                                        <a t-attf-href="/my/communication/student/#{student.id}"
+                                                           class="btn btn-sm btn-primary w-100">
+                                                            <i class="fa fa-comments me-1"></i>
+                                                            Start Discussion
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="text-muted mb-0">No admission officers assigned</p>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Programs/Applications -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fa fa-book me-2"></i>Programs &amp;
+                                    Applications</h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="student.program_ids">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Program</th>
+                                                    <th>Country</th>
+                                                    <th>Institute</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="student.program_ids" t-as="program">
+                                                    <tr data-bs-toggle="modal" t-attf-data-bs-target="#programModal#{program.id}" style="cursor:pointer;" class="table-row-hover">
+                                                        <td>
+                                                            <strong t-esc="program.program_id.name or '-'" />
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="program.country_id">
+                                                                <i class="fa fa-globe me-1 text-primary"></i>
+                                                                <t t-esc="program.country_id.name" />
+                                                            </t>
+                                                            <t t-else="">-</t>
+                                                        </td>
+                                                        <td t-esc="program.institute_id.name or '-'" />
+                                                        <td>
+                                                            <span t-attf-class="badge bg-{{
+                                                                    'success' if program.stage_code == 'done' else
+                                                                    'primary' if program.stage_code in ['applied', 'confirmed'] else
+                                                                    'warning' if program.stage_code in ['submitted', 'draft'] else
+                                                                    'danger' if program.stage_code == 'cancelled' else
+                                                                    'info'
+                                                                }}">
+                                                                <t t-esc="program.stage_code.replace('_', ' ').title()" />
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Program Details Modal -->
+                                                    <div class="modal fade" t-attf-id="programModal#{program.id}" tabindex="-1" aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header bg-light border-bottom">
+                                                                    <h5 class="modal-title">Program Details</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <!-- Program Header -->
+                                                                    <div class="mb-4 pb-3 border-bottom">
+                                                                        <h6 class="text-primary mb-1">Program</h6>
+                                                                        <h4 class="mb-0" t-esc="program.program_id.name or '-'"/>
+                                                                    </div>
+
+                                                                    <!-- Program Details Grid -->
+                                                                    <div class="row mb-4">
+                                                                        <div class="col-md-6">
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label text-muted small">Country</label>
+                                                                                <p class="mb-0 fw-500" t-esc="program.country_id.name or '-'"/>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label text-muted small">Institute</label>
+                                                                                <p class="mb-0 fw-500" t-esc="program.institute_id.name or '-'"/>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Stage and Status -->
+                                                                    <div class="row mb-4">
+                                                                        <div class="col-md-6">
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label text-muted small">Current Stage</label>
+                                                                                <p class="mb-0">
+                                                                                    <span t-attf-class="badge bg-{{
+                                                                        'success' if program.stage_code == 'done' else
+                                                                        'primary' if program.stage_code in ['applied', 'confirmed'] else
+                                                                        'warning' if program.stage_code in ['submitted', 'draft'] else
+                                                                        'danger' if program.stage_code == 'cancelled' else
+                                                                        'info'
+                                                                    }}">
+                                                                                        <t t-esc="program.stage_id.name or program.stage_code.replace('_', ' ').title()" />
+                                                                                    </span>
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label text-muted small">Status</label>
+                                                                                <p class="mb-0">
+                                                                                    <t t-if="program.stage_code == 'applied'">
+                                                                        <span t-attf-class="badge bg-{{ 'success' if program.apply_state == 'submit' else 'info' if program.apply_state == 'in_progress' else 'warning' }}">
+                                                                            <t t-esc="dict([('submit','Submitted'),('in_progress','In Progress'),('pending','Pending')]).get(program.apply_state, '-')" />
+                                                                        </span>
+                                                                    </t>
+                                                                    <t t-elif="program.stage_code == 'offer_letter'">
+                                                                        <span t-attf-class="badge bg-{{ 'success' if program.offer_letter_state == 'accepted' else 'info' if program.offer_letter_state == 'issued' else 'danger' }}">
+                                                                            <t t-esc="dict([('issued','Issued'),('accepted','Accepted'),('rejected','Rejected')]).get(program.offer_letter_state, '-')" />
+                                                                        </span>
+                                                                    </t>
+                                                                    <t t-elif="program.stage_code == 'sponsor_document'">
+                                                                        <span t-attf-class="badge bg-{{ 'success' if program.sponsor_and_document_state == 'file_ready' else 'info' }}">
+                                                                            <t t-esc="dict([('file_ready','File Ready'),('in_progress','In Progress')]).get(program.sponsor_and_document_state, '-')" />
+                                                                        </span>
+                                                                    </t>
+                                                                    <t t-elif="program.stage_code == 'gs_state'">
+                                                                        <span t-attf-class="badge bg-{{ 'success' if program.gs_state == 'approve' else 'danger' if program.gs_state == 'reject' else 'warning' if program.gs_state == 'revised' else 'info' if program.gs_state == 'in_progress' else 'secondary' }}">
+                                                                            <t t-esc="dict([('submit','Submitted'),('in_progress','In Progress'),('revised','Revised'),('approve','Approved'),('reject','Rejected')]).get(program.gs_state, '-')" />
+                                                                        </span>
+                                                                    </t>
+                                                                    <t t-elif="program.stage_code == 'tuition_fee'">
+                                                                        <span t-attf-class="badge bg-{{ 'success' if program.tuition_fee_state == 'paid' else 'warning' }}">
+                                                                            <t t-esc="dict([('paid','Paid'),('unpaid','Unpaid')]).get(program.tuition_fee_state, '-')" />
+                                                                        </span>
+                                                                    </t>
+                                                                    <t t-elif="program.stage_code == 'final_offer'">
+                                                                        <span t-attf-class="badge bg-{{ 'success' if program.final_offer_state == 'received' else 'warning' }}">
+                                                                            <t t-esc="dict([('received','Received'),('not_received','Not Received')]).get(program.final_offer_state, '-')" />
+                                                                        </span>
+                                                                    </t>
+                                                                    <t t-elif="program.stage_code == 'visa_documentation'">
+                                                                        <span t-attf-class="badge bg-{{ 'success' if program.visa_documentation_state == 'ready' else 'warning' }}">
+                                                                            <t t-esc="dict([('ready','Ready'),('not_ready','Not Ready')]).get(program.visa_documentation_state, '-')" />
+                                                                        </span>
+                                                                    </t>
+                                                                    <t t-elif="program.stage_code == 'visa_processing'">
+                                                                        <span t-attf-class="badge bg-{{ 'success' if program.visa_state == 'approve' else 'danger' if program.visa_state == 'reject' else 'info' }}">
+                                                                            <t t-esc="dict([('apply','Applied'),('approve','Approved'),('reject','Rejected')]).get(program.visa_state, '-')" />
+                                                                        </span>
+                                                                    </t>
+                                                                    <t t-else="">
+                                                                        <span class="text-muted">-</span>
+                                                                    </t>
+                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Intake and Campus Section -->
+                                                                    <div class="row mb-4">
+                                                                        <div class="col-md-6">
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label text-muted small">Intake</label>
+                                                                                <p class="mb-0 fw-500" t-esc="program.intake_id.name or '-'"/>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label text-muted small">Campus</label>
+                                                                                <p class="mb-0 fw-500" t-esc="program.campus or '-'"/>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Financial Information Section -->
+                                                                    <t t-if="program.tuition_fee or program.scholarship_percentage">
+                                                                        <div class="row mb-4">
+                                                                            <div class="col-md-6">
+                                                                                <div class="mb-3">
+                                                                                    <label class="form-label text-muted small">Tuition Fee</label>
+                                                                                    <p class="mb-0 fw-500" t-esc="'{:,.2f}'.format(program.tuition_fee or 0)"/>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <div class="mb-3">
+                                                                                    <label class="form-label text-muted small">Scholarship (%)</label>
+                                                                                    <p class="mb-0 fw-500" t-esc="'{:,.2f}'.format(program.scholarship_percentage or 0)"/>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row mb-4">
+                                                                            <div class="col-md-6">
+                                                                                <div class="mb-3">
+                                                                                    <label class="form-label text-muted small">Scholarship Amount</label>
+                                                                                    <p class="mb-0 fw-500 text-success" t-esc="'{:,.2f}'.format(program.scholarship_amount or 0)"/>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <div class="mb-3">
+                                                                                    <label class="form-label text-muted small">Calculated Tuition Fee</label>
+                                                                                    <p class="mb-0 fw-500 text-primary" t-esc="'{:,.2f}'.format(program.calculated_fee or 0)"/>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </t>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="text-muted mb-0">No programs applied yet</p>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Education History -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fa fa-graduation-cap me-2"></i>Education
+                                    History</h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="student.result_ids">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Exam Type</th>
+                                                    <th>Institution</th>
+                                                    <th>Group / Program</th>
+                                                    <th>Year</th>
+                                                    <th>Result</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="student.result_ids" t-as="result">
+                                                    <tr>
+                                                        <td>
+                                                            <span class="badge bg-primary"
+                                                                t-esc="(result.exam_type or '').upper()" />
+                                                        </td>
+                                                        <td t-esc="result.institution_id.name or '-'" />
+                                                        <td>
+                                                            <t t-if="result.exam_type in ['ssc', 'hsc', 'o_level', 'a_level', 'dakhil', 'alim']">
+                                                                <t t-esc="(result.group or '').title() or '-'" />
+                                                            </t>
+                                                            <t t-else="">
+                                                                <t t-esc="result.program_id.name or '-'" />
+                                                            </t>
+                                                        </td>
+                                                        <td t-esc="result.passing_year or '-'" />
+                                                        <td>
+                                                            <t t-if="result.exam_type in ['o_level', 'a_level']">
+                                                                <t t-if="result.percentage">
+                                                                    <strong><t t-esc="result.percentage" />%</strong>
+                                                                </t>
+                                                                <t t-else="">-</t>
+                                                            </t>
+                                                            <t t-elif="result.exam_type in ['ssc', 'hsc', 'dakhil', 'alim']">
+                                                                <t t-if="result.gpa">
+                                                                    <strong>GPA <t t-esc="result.gpa" /></strong>
+                                                                </t>
+                                                                <t t-else="">-</t>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <t t-if="result.cgpa">
+                                                                    <strong>CGPA <t t-esc="result.cgpa" /></strong>
+                                                                </t>
+                                                                <t t-else="">-</t>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="text-muted mb-0">No education records available</p>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Language Tests -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fa fa-language me-2"></i>Language Test
+                                    Scores</h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="student.language_test_line_ids">
+                                    <div class="row g-3">
+                                        <t t-foreach="student.language_test_line_ids" t-as="test">
+                                            <div class="col-md-6">
+                                                <div class="border rounded p-3">
+                                                    <h6 class="mb-2"
+                                                        t-esc="test.language_test_type.test_name or 'Language Test'" />
+                                                    <p class="small mb-1">
+                                                        <strong>Score:</strong>
+                                                        <t t-esc="test.total_score or 'N/A'" />
+                                                    </p>
+                                                    <p class="small mb-1">
+                                                        <strong>Test Date:</strong>
+                                                        <t t-esc="test.date_of_exam or 'N/A'" />
+                                                    </p>
+                                                    <!-- <p class="small mb-0">
+                                                        <strong>Expire Date:</strong>
+                                                        <t t-esc="test.expire_date or 'N/A'" />
+                                                    </p> -->
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="text-muted mb-0">No language test records available</p>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Parent Information -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fa fa-users me-2"></i>Parent/Guardian
+                                    Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="student.parent_ids">
+                                    <div class="row g-3">
+                                        <t t-foreach="student.parent_ids" t-as="parent">
+                                            <div class="col-md-6">
+                                                <div class="border rounded p-3">
+                                                    <h6 class="mb-2" t-esc="parent.name" />
+                                                    <p class="small mb-1">
+                                                        <strong>Relation:</strong>
+                                                        <t
+                                                            t-esc="parent.relation.title() if parent.relation else 'N/A'" />
+                                                    </p>
+                                                    <p class="small mb-1">
+                                                        <i class="fa fa-envelope text-muted me-1"></i>
+                                                        <t t-esc="parent.email or 'N/A'" />
+                                                    </p>
+                                                    <p class="small mb-1">
+                                                        <i class="fa fa-phone text-muted me-1"></i>
+                                                        <t t-esc="parent.phone or 'N/A'" />
+                                                    </p>
+                                                    <p class="small mb-0">
+                                                        <strong>Occupation:</strong>
+                                                        <t t-esc="parent.occupation or 'N/A'" />
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="text-muted mb-0">No parent/guardian information
+                                        available</p>
+                                </t>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Styles for clickable table rows -->
+            <style>
+                .table-row-hover {
+                    transition: background-color 0.2s ease;
+                }
+                .table-row-hover:hover {
+                    background-color: #f0f0f0 !important;
+                }
+            </style>
+        </t>
+    </template>
+</odoo>

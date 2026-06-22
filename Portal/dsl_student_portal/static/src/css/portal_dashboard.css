@@ -1,0 +1,291 @@
+/* Blue Theme Portal Dashboard CSS */
+
+/* Remove background colors from card bodies */
+.card-body {
+  background-color: transparent !important;
+  background: none !important;
+}
+
+/* Primary Blue Color Variables */
+:root {
+  --primary-blue: #2563eb;
+  --primary-blue-dark: #1e40af;
+  --primary-blue-light: #3b82f6;
+  --primary-blue-lighter: #60a5fa;
+  --primary-blue-pale: #dbeafe;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+}
+
+/* Primary Button Styles */
+.btn-primary {
+  background-color: var(--primary-blue) !important;
+  border-color: var(--primary-blue) !important;
+  color: white !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-blue-dark) !important;
+  border-color: var(--primary-blue-dark) !important;
+}
+
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--primary-blue-dark) !important;
+  border-color: var(--primary-blue-dark) !important;
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25) !important;
+}
+
+/* Outline Primary Button */
+.btn-outline-primary {
+  color: var(--primary-blue) !important;
+  border-color: var(--primary-blue) !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-blue) !important;
+  border-color: var(--primary-blue) !important;
+  color: white !important;
+}
+
+/* Text Colors */
+.text-primary {
+  color: var(--primary-blue) !important;
+}
+
+/* Badge Primary */
+.badge.bg-primary {
+  background-color: var(--primary-blue) !important;
+}
+
+/* Card Headers */
+.card-header.bg-primary {
+  background-color: var(--primary-blue) !important;
+  color: white !important;
+}
+
+/* Links */
+a {
+  color: var(--primary-blue);
+}
+
+a:hover {
+  color: var(--primary-blue-dark);
+}
+
+/* Active Menu Items */
+.list-group-item.active {
+  background-color: var(--primary-blue) !important;
+  border-color: var(--primary-blue) !important;
+}
+
+.list-group-item-action:hover {
+  background-color: var(--primary-blue-pale);
+}
+
+/* Form Controls Focus */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-blue-light) !important;
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Icons with Primary Color */
+.fa.text-primary,
+i.text-primary {
+  color: var(--primary-blue) !important;
+}
+
+/* Alert Primary */
+.alert-primary {
+  background-color: var(--primary-blue-pale);
+  border-color: var(--primary-blue-lighter);
+  color: var(--primary-blue-dark);
+}
+
+/* Modal Header */
+.modal-header {
+  background-color: #f8fafc;
+  border-bottom: 2px solid var(--primary-blue-pale);
+}
+
+/* Table Hover Effects */
+.table-hover tbody tr:hover {
+  background-color: var(--primary-blue-pale);
+}
+
+/* Breadcrumb Active */
+.breadcrumb-item.active {
+  color: var(--primary-blue);
+}
+
+/* Custom Card Hover */
+.card {
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Progress Bar */
+.progress-bar {
+  background-color: var(--primary-blue) !important;
+}
+
+/* Pagination */
+.page-link {
+  color: var(--primary-blue);
+}
+
+.page-link:hover {
+  color: var(--primary-blue-dark);
+  background-color: var(--primary-blue-pale);
+  border-color: var(--primary-blue-light);
+}
+
+.page-item.active .page-link {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
+}
+
+/* Nav Tabs */
+.nav-tabs .nav-link.active {
+  color: var(--primary-blue) !important;
+  border-bottom-color: var(--primary-blue) !important;
+}
+
+/* Dropdown */
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: var(--primary-blue-pale);
+  color: var(--primary-blue-dark);
+}
+
+/* Border Colors */
+.border-primary {
+  border-color: var(--primary-blue) !important;
+}
+
+/* Background Utilities */
+.bg-primary {
+  background-color: var(--primary-blue) !important;
+}
+
+/* Login/Auth Page Specific */
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Profile Image Border */
+.rounded-circle {
+  border-color: var(--primary-blue-pale) !important;
+}
+
+/* Dashboard Statistics Cards - Keep gradients but add blue accent */
+.card.border-0.shadow-sm {
+  border-left: 4px solid transparent !important;
+}
+
+.card.border-0.shadow-sm:hover {
+  border-left-color: var(--primary-blue) !important;
+}
+
+/* Input Groups */
+.input-group-text {
+  background-color: var(--primary-blue-pale);
+  border-color: var(--primary-blue-light);
+  color: var(--primary-blue-dark);
+}
+
+/* Scrollbar (Webkit browsers) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-blue-light);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-blue);
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .btn-primary {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Custom Focus Styles */
+*:focus {
+  outline: 2px solid var(--primary-blue-light);
+  outline-offset: 2px;
+}
+
+button:focus,
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25) !important;
+}
+
+/* Loading Spinner */
+.spinner-border {
+  color: var(--primary-blue) !important;
+}
+
+/* Toast Notifications */
+.toast-header {
+  background-color: var(--primary-blue-pale);
+  color: var(--primary-blue-dark);
+}
+
+/* Select2 / Chosen Styles (if used) */
+.select2-container--default
+  .select2-results__option--highlighted[aria-selected] {
+  background-color: var(--primary-blue) !important;
+}
+
+/* Custom Checkbox/Radio */
+.form-check-input:checked {
+  background-color: var(--primary-blue) !important;
+  border-color: var(--primary-blue) !important;
+}
+
+/* Shadow Utilities with Blue Tint */
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(37, 99, 235, 0.075) !important;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(37, 99, 235, 0.15) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(37, 99, 235, 0.175) !important;
+}

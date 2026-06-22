@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_custom_header" inherit_id="portal.frontend_layout">
+        <xpath expr="//t[@t-call='portal.user_dropdown']" position="before">
+            <t t-set="is_connected" t-value="not user_id._is_public()"/>
+            <li t-if="is_connected" class="nav-item dropdown o_no_autohide_item me-2">
+                <a href="#" class="nav-link dropdown-toggle position-relative" 
+                   id="portal_notification_dropdown" 
+                   role="button" 
+                   data-bs-toggle="dropdown" 
+                   aria-expanded="false">
+                    <i class="fa fa-bell fa-lg text-muted"/>
+                    <span id="navbar_notification_badge" 
+                          t-attf-class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {{ 'd-none' if not ((unread_notices_count or 0) + (overdue_count or 0) + (unpaid_invoice_count or 0) + len(due_soon_documents or [])) else '' }}"
+                          style="font-size: 0.6rem;">
+                        <t t-esc="(unread_notices_count or 0) + (overdue_count or 0) + (unpaid_invoice_count or 0) + len(due_soon_documents or [])"/>
+                    </span>
+                </a>
+                    <div class="dropdown-menu dropdown-menu-end shadow border-0 p-0" aria-labelledby="portal_notification_dropdown" style="width: 380px; max-height: 500px; overflow-y: auto;">
+                        <div class="dropdown-header d-flex justify-content-between align-items-center bg-white border-bottom py-3 px-3 position-sticky top-0" style="z-index: 10;">
+                            <span class="fw-bold text-dark fs-6">
+                                Notifications 
+                                <t t-set="total_notif_count" t-value="(unread_notices_count or 0) + (overdue_count or 0) + (unpaid_invoice_count or 0) + len(due_soon_documents or [])"/>
+                                <t t-if="total_notif_count > 0">
+                                    <span class="badge bg-danger rounded-pill ms-1" style="font-size: 0.7rem;"><t t-esc="total_notif_count"/></span>
+                                </t>
+                            </span>
+                            <t t-if="unread_notices_count and unread_notices_count > 0">
+                                <a href="/my/notification/mark_all_read" class="small text-primary text-decoration-none fw-bold" title="Mark all as read">
+                                    <i class="fa fa-check-double me-1"></i>Mark all as Read
+                                </a>
+                            </t>
+                        </div>
+                        
+                        <div class="list-group list-group-flush">
+                            <!-- Overdue Documents Section -->
+                            <t t-if="overdue_documents">
+                                <t t-foreach="overdue_documents" t-as="doc">
+                                    <a href="/my/documents?priority=all" class="list-group-item list-group-item-action py-3 px-3 border-bottom bg-light">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0 me-3">
+                                                <div class="avatar bg-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <i class="fa fa-folder-open text-white"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 min-width-0">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <small class="text-uppercase text-danger fw-bold" style="font-size: 0.7rem;">Document Overdue</small>
+                                                </div>
+                                                <h6 class="mb-1 fw-bold text-dark" style="max-width: 250px;">
+                                                    <t t-esc="doc.document_type_id.name"/>
+                                                </h6>
+                                                <t t-if="doc.student_id.partner_id != request.env.user.partner_id">
+                                                    <small class="d-block text-muted border-bottom pb-1 mb-1">
+                                                        <i class="fa fa-user me-1"></i> <t t-esc="doc.student_id.name"/>
+                                                    </small>
+                                                </t>
+                                                <small class="text-danger fw-bold">
+                                                    Please submit this document immediately.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </t>
+                            </t>
+
+                            <!-- Due Soon Documents Section -->
+                            <t t-if="due_soon_documents">
+                                <t t-foreach="due_soon_documents" t-as="doc">
+                                    <a href="/my/documents?priority=all" class="list-group-item list-group-item-action py-3 px-3 border-bottom bg-light">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0 me-3">
+                                                <div class="avatar bg-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <i class="fa fa-folder-open text-white"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 min-width-0">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <small class="text-uppercase text-warning fw-bold" style="font-size: 0.7rem;">Document Due Soon</small>
+                                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                                        Due: <t t-esc="doc.due_date"/>
+                                                    </small>
+                                                </div>
+                                                <h6 class="mb-1 fw-bold text-dark" style="max-width: 250px;">
+                                                    <t t-esc="doc.document_type_id.name"/>
+                                                </h6>
+                                                <t t-if="doc.student_id.partner_id != request.env.user.partner_id">
+                                                    <small class="d-block text-muted border-bottom pb-1 mb-1">
+                                                        <i class="fa fa-user me-1"></i> <t t-esc="doc.student_id.name"/>
+                                                    </small>
+                                                </t>
+                                                <small class="text-secondary">
+                                                    <t t-set="days_left" t-value="(doc.due_date - today).days"/>
+                                                    <t t-if="days_left == 0">Due Today</t>
+                                                    <t t-elif="days_left == 1">Due Tomorrow</t>
+                                                    <t t-else="">Due in <t t-esc="days_left"/> days</t>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </t>
+                            </t>
+
+                            <!-- Due Soon / Unpaid Invoices Section -->
+                            <t t-if="unpaid_invoices">
+                                <!-- Prefer due soon first -->
+                                <t t-foreach="unpaid_invoices" t-as="inv">
+                                    <t t-set="is_due_soon" t-value="inv in due_soon_invoices"/>
+                                    <a t-attf-href="/my/invoices/{{inv.id}}" class="list-group-item list-group-item-action py-3 px-3 border-bottom {{ 'bg-light-warning' if is_due_soon else 'bg-white' }}">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0 me-3">
+                                                <div t-attf-class="avatar rounded-circle d-flex align-items-center justify-content-center {{ 'bg-warning' if is_due_soon else 'bg-light-secondary' }}" style="width: 40px; height: 40px;">
+                                                    <i t-attf-class="fa fa-file-text-o {{ 'text-white' if is_due_soon else 'text-secondary' }}"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 min-width-0">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <small t-attf-class="text-uppercase fw-bold {{ 'text-warning' if is_due_soon else 'text-muted' }}" style="font-size: 0.7rem;">
+                                                        <t t-if="is_due_soon">Due Soon</t>
+                                                        <t t-else="">Unpaid Invoice</t>
+                                                    </small>
+                                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                                        Due: <t t-esc="inv.invoice_date_due"/>
+                                                    </small>
+                                                </div>
+                                                <h6 class="mb-1 text-dark fw-bold">
+                                                    <t t-esc="inv.name"/>
+                                                </h6>
+                                                <t t-if="inv.partner_id != request.env.user.partner_id">
+                                                    <small class="d-block text-muted border-bottom pb-1 mb-1">
+                                                        <i class="fa fa-user me-1"></i> <t t-esc="inv.partner_id.name"/>
+                                                    </small>
+                                                </t>
+                                                <span t-attf-class="badge rounded-pill {{ 'bg-warning text-dark' if is_due_soon else 'bg-secondary' }}" style="font-size: 0.65rem;">
+                                                    <t t-esc="inv.amount_residual" t-options='{"widget": "monetary", "display_currency": inv.currency_id}'/>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </t>
+                            </t>
+
+                            <!-- Existing Notices -->
+                            <t t-if="recent_notices">
+                                <t t-foreach="recent_notices" t-as="notice">
+                                    <t t-set="is_read" t-value="request.env.user.partner_id in notice.read_partner_ids"/>
+                                    <a t-attf-href="/my/notification/read/{{notice.id}}" 
+                                       t-attf-class="list-group-item list-group-item-action py-3 px-3 border-bottom {{ 'bg-light' if not is_read else 'bg-white' }}">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0 me-3">
+                                                <div class="avatar bg-light-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <i class="fa fa-bullhorn text-primary"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 min-width-0">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Source: Notice</small>
+                                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                                        <t t-esc="notice.create_date.strftime('%d %b, %I:%M %p')"/>
+                                                    </small>
+                                                </div>
+                                                <h6 t-attf-class="mb-1 text-truncate {{ 'fw-bold text-dark' if not is_read else 'fw-normal text-muted' }}" style="max-width: 250px;">
+                                                    <t t-esc="notice.name"/>
+                                                </h6>
+                                                <t t-if="not is_read">
+                                                    <span class="badge bg-primary rounded-pill mt-1" style="font-size: 0.65rem;">New</span>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </t>
+                            </t>
+                            <t t-if="not recent_notices and not overdue_documents and not unpaid_invoices">
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fa fa-bell-slash fa-2x mb-2 opacity-50"></i>
+                                    <p class="mb-0 small">No notifications yet</p>
+                                </div>
+                            </t>
+                        </div>
+                        
+                        <a href="/my/notifications" class="dropdown-item text-center small text-primary fw-bold py-3 bg-light border-top position-sticky bottom-0 opacity-100" style="z-index: 10;">
+                            See All Notifications <i class="fa fa-arrow-right ms-1"></i>
+                        </a>
+                </div>
+            </li>
+        </xpath>
+    </template>
+
+    <template id="portal_breadcrumbs_dsl" inherit_id="portal.portal_breadcrumbs">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]/li[1]/a/i" position="after">
+            Home
+        </xpath>
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'dashboard'" class="breadcrumb-item">Dashboard</li>
+            <li t-if="page_name == 'programs'" class="breadcrumb-item">Programs</li>
+            <li t-if="page_name == 'complaints'" class="breadcrumb-item">Complaints</li>
+            <li t-if="page_name == 'profile'" class="breadcrumb-item">My Profile</li>
+            <li t-if="page_name == 'communication'" class="breadcrumb-item">Communication</li>
+            <li t-if="page_name == 'documents'" class="breadcrumb-item">Documents</li>
+            <li t-if="page_name == 'notifications'" class="breadcrumb-item">Notifications</li>
+        </xpath>
+    </template>
+</odoo>

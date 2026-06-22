@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="agent_commission" name="Agent Commission">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'commission'"/>
+            <div class="container-fluid py-4">
+                <div class="row">
+                    <t t-call="dsl_student_portal.agent_sidebar" />
+                    <div class="col-lg-9 col-md-8 col-12">
+
+                        <!-- Page Header -->
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="fa fa-money fa-2x text-primary me-3"></i>
+                            <h4 class="mb-0">Commission</h4>
+                        </div>
+
+                        <!-- Summary Cards -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-4">
+                                <div class="card border-0 shadow-sm text-center py-3">
+                                    <div class="card-body">
+                                        <p class="text-muted small mb-1">Total Payable</p>
+                                        <h5 class="fw-bold text-dark">
+                                            <t t-esc="sum(agent.history_line_ids.mapped('total_payable'))"/>
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="card border-0 shadow-sm text-center py-3">
+                                    <div class="card-body">
+                                        <p class="text-muted small mb-1">Total Paid</p>
+                                        <h5 class="fw-bold text-success">
+                                            <t t-esc="sum(agent.history_line_ids.mapped('total_paid'))"/>
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="col-sm-4">
+                                <div class="card border-0 shadow-sm text-center py-3">
+                                    <div class="card-body">
+                                        <p class="text-muted small mb-1">Total Due</p>
+                                        <h5 class="fw-bold text-danger">
+                                            <t t-esc="sum(agent.history_line_ids.mapped('total_due'))"/>
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+
+                        <!-- Commission Table -->
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body p-0">
+                                <t t-if="agent.history_line_ids">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-3">#</th>
+                                                    <th>Student</th>
+                                                    <th>Country</th>
+                                                    <th>Institute</th>
+                                                    <th>Program</th>
+                                                    <th>Tuition Fee</th>
+                                                    <th>Invoice</th>
+                                                    <th class="text-end">Payable</th>
+                                                    <th class="text-end">Paid</th>
+                                                    <!-- <th class="text-end pe-3">Due</th> -->
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="agent.history_line_ids" t-as="line">
+                                                    <t t-if="line.stage_id and line.stage_id.search_code == 'done'">
+                                                        <tr>
+                                                            <td class="ps-3 text-muted">
+                                                                <t t-esc="line_index + 1"/>
+                                                            </td>
+                                                            <td>
+                                                                <div class="fw-semibold">
+                                                                    <t t-esc="line.student_id.name or '-'"/>
+                                                                </div>
+                                                                <small class="text-muted">
+                                                                    <t t-esc="line.student_id_string or ''"/>
+                                                                </small>
+                                                            </td>
+                                                            <td>
+                                                                <t t-esc="line.country_id.name if line.country_id else '-'"/>
+                                                            </td>
+                                                            <td>
+                                                                <t t-esc="line.institute_id.name if line.institute_id else '-'"/>
+                                                            </td>
+                                                            <td>
+                                                                <t t-esc="line.program_id.name if line.program_id else '-'"/>
+                                                            </td>
+                                                            <td>
+                                                                <t t-esc="'{:,.2f}'.format(line.program_line_id.tuition_fee or 0)"/>
+                                                            </td>
+                                                            <td>
+                                                                <t t-if="line.move_id">
+                                                                    <a t-attf-href="/my/invoices/#{line.move_id.id}" class="text-primary">
+                                                                        <t t-esc="line.move_id.name"/>
+                                                                    </a>
+                                                                    <!-- Payment state badge -->
+                                                                    <t t-if="line.move_id.payment_state == 'paid'">
+                                                                        <span class="badge bg-success ms-1">Paid</span>
+                                                                    </t>
+                                                                    <t t-elif="line.move_id.payment_state == 'partial'">
+                                                                        <span class="badge bg-warning ms-1">Partial</span>
+                                                                    </t>
+                                                                    <t t-else="">
+                                                                        <span class="badge bg-danger ms-1">Unpaid</span>
+                                                                    </t>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="text-muted">No Invoice</span>
+                                                                </t>
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <t t-esc="line.currency_id.symbol or ''"/>
+                                                                <t t-esc="'%.2f' % line.total_payable"/>
+                                                            </td>
+                                                            <td class="text-end text-success fw-semibold">
+                                                                <t t-esc="line.currency_id.symbol or ''"/>
+                                                                <t t-esc="'%.2f' % line.total_paid"/>
+                                                            </td>
+                                                            <!-- <td class="text-end text-danger fw-semibold pe-3">
+                                                                <t t-esc="line.currency_id.symbol or ''"/>
+                                                                <t t-esc="'%.2f' % line.total_due"/>
+                                                            </td> -->
+                                                        </tr>
+                                                    </t>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+
+                                <!-- Empty state -->
+                                <t t-else="">
+                                    <div class="text-center py-5 text-muted">
+                                        <i class="fa fa-money fa-3x mb-3 opacity-25"></i>
+                                        <p class="mb-0">No commission records found.</p>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,948 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="agent_dashboard" name="Agent Dashboard">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'dashboard'"/>
+            <div class="container-fluid px-3 px-lg-4">
+                <div class="row">
+                    <!-- Left Sidebar -->
+                    <t t-call="dsl_student_portal.agent_sidebar"/>
+
+                    <!-- Main Content Area -->
+                    <div class="col-lg-9 col-md-8 col-12 py-3">
+
+                        <!-- Header -->
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="fa fa-tachometer fa-2x text-primary me-3"></i>
+                            <h4 class="mb-0 fw-bold">Agent Dashboard</h4>
+                        </div>
+
+                        <!-- =============================== -->
+                        <!-- Data Preparation               -->
+                        <!-- =============================== -->
+                        <t t-set="agent_students" t-value="request.env['dsl.study.student'].sudo().search([('agent_ids', 'in', agent.id), ('active', 'in', [True, False])])"/>
+                        <t t-set="total_students"  t-value="len(agent_students)"/>
+
+                        <t t-set="all_programs" t-value="request.env['dsl.study.student.program.line'].sudo().search([('student_id', 'in', agent_students.ids)])"/>
+
+                        <!-- Missing Documents: required docs not yet received -->
+                        <t t-set="all_student_docs" t-value="request.env['dsl.study.student.document.line'].sudo().search([('student_id', 'in', agent_students.ids)])"/>
+                        <t t-set="missing_docs_count" t-value="len(all_student_docs.filtered(lambda d: d.priority == 'required' and d.state == 'not_received'))"/>
+
+                        <!-- Application Submitted: stage_code == 'applied' AND apply_state == 'submit' -->
+                        <t t-set="applied_programs"    t-value="all_programs.filtered(lambda p: p.stage_code == 'applied' and p.apply_state == 'submit')"/>
+                        <t t-set="app_submitted_count" t-value="len(applied_programs)"/>
+
+                        <!-- Offer Received: stage_code == 'final_offer' AND final_offer_state == 'received' -->
+                        <t t-set="offer_programs"       t-value="all_programs.filtered(lambda p: p.stage_code == 'final_offer' and p.final_offer_state == 'received')"/>
+                        <t t-set="offer_received_count" t-value="len(offer_programs)"/>
+
+                        <!-- Tuition Fees Paid: MUST be in tuition_fee stage AND tuition_fee_state == 'paid' -->
+                        <t t-set="tuition_paid_count"  t-value="len(all_programs.filtered(lambda p: p.stage_code == 'tuition_fee' and p.tuition_fee_state == 'paid'))"/>
+
+                        <!-- Visa Applied: stage_code == 'visa_processing' AND visa_state == 'apply' -->
+                        <t t-set="visa_applied_progs"  t-value="all_programs.filtered(lambda p: p.stage_code == 'visa_processing' and p.visa_state == 'apply')"/>
+                        <t t-set="visa_applied_count"  t-value="len(visa_applied_progs)"/>
+
+                        <!-- Visa Approved: stage_code == 'visa_processing' AND visa_state == 'approve' -->
+                        <t t-set="visa_approved_progs" t-value="all_programs.filtered(lambda p: p.stage_code == 'visa_processing' and p.visa_state == 'approve')"/>
+                        <t t-set="visa_approved_count" t-value="len(visa_approved_progs)"/>
+
+                        <!-- Visa Rejected: stage_code == 'visa_processing' AND visa_state == 'reject' -->
+                        <t t-set="visa_rejected_progs" t-value="all_programs.filtered(lambda p: p.stage_code == 'visa_processing' and p.visa_state == 'reject')"/>
+                        <t t-set="visa_rejected_count" t-value="len(visa_rejected_progs)"/>
+
+                        <!-- In-Active Students: students whose state == 'cancelled' -->
+                        <t t-set="inactive_students_count" t-value="len(agent_students.filtered(lambda s: s.state == 'cancelled'))"/>
+
+                        <!-- =============================== -->
+                        <!-- 9 Stats Cards (3 x 3 grid)     -->
+                        <!-- =============================== -->
+                        <div class="row g-3 mb-4">
+
+                            <!-- 1. Total Students -->
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <a href="/my/agent/students" class="text-decoration-none">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="background:linear-gradient(135deg,#3b82f6,#1e40af);">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-3">
+                                                    <i class="fa fa-users fa-3x text-white opacity-75"></i>
+                                                </div>
+                                                <div class="col-9 text-end">
+                                                    <h6 class="text-white mb-1">Total Students</h6>
+                                                    <h2 class="text-white mb-0 fw-bold" t-esc="total_students"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- 2. Missing Documents -->
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <a href="/my/documents?state=not_received&amp;priority=required" class="text-decoration-none">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="background:linear-gradient(135deg,#ef4444,#b91c1c);">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-3">
+                                                    <i class="fa fa-file-text-o fa-3x text-white opacity-75"></i>
+                                                </div>
+                                                <div class="col-9 text-end">
+                                                    <h6 class="text-white mb-1">Missing Documents</h6>
+                                                    <h2 class="text-white mb-0 fw-bold" t-esc="missing_docs_count"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- 3. Application Submitted -->
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <a href="/my/agent/students/apply?state=submit" class="text-decoration-none">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-3">
+                                                    <i class="fa fa-paper-plane fa-3x text-white opacity-75"></i>
+                                                </div>
+                                                <div class="col-9 text-end">
+                                                    <h6 class="text-white mb-1">Application Submitted</h6>
+                                                    <h2 class="text-white mb-0 fw-bold" t-esc="app_submitted_count"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- 4. Offer Received -->
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <a href="/my/agent/students/offer?state=received" class="text-decoration-none">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="background:linear-gradient(135deg,#10b981,#047857);">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-3">
+                                                    <i class="fa fa-envelope-open fa-3x text-white opacity-75"></i>
+                                                </div>
+                                                <div class="col-9 text-end">
+                                                    <h6 class="text-white mb-1">Offer Received</h6>
+                                                    <h2 class="text-white mb-0 fw-bold" t-esc="offer_received_count"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- 5. Tuition Fees Paid -->
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <a href="/my/agent/students/tuition?state=paid" class="text-decoration-none">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="background:linear-gradient(135deg,#f59e0b,#b45309);">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-3">
+                                                    <i class="fa fa-money fa-3x text-white opacity-75"></i>
+                                                </div>
+                                                <div class="col-9 text-end">
+                                                    <h6 class="text-white mb-1">Tuition Fees Paid</h6>
+                                                    <h2 class="text-white mb-0 fw-bold" t-esc="tuition_paid_count"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- 6. Visa Applied -->
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <a href="/my/agent/students/visa?state=apply" class="text-decoration-none">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="background:linear-gradient(135deg,#06b6d4,#0e7490);">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-3">
+                                                    <i class="fa fa-id-card fa-3x text-white opacity-75"></i>
+                                                </div>
+                                                <div class="col-9 text-end">
+                                                    <h6 class="text-white mb-1">Visa Applied</h6>
+                                                    <h2 class="text-white mb-0 fw-bold" t-esc="visa_applied_count"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- 7. Visa Approved -->
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <a href="/my/agent/students/visa?state=approve" class="text-decoration-none">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="background:linear-gradient(135deg,#16a34a,#14532d);">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-3">
+                                                    <i class="fa fa-check-circle fa-3x text-white opacity-75"></i>
+                                                </div>
+                                                <div class="col-9 text-end">
+                                                    <h6 class="text-white mb-1">Visa Approved</h6>
+                                                    <h2 class="text-white mb-0 fw-bold" t-esc="visa_approved_count"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- 8. Visa Rejected -->
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <a href="/my/agent/students/visa?state=reject" class="text-decoration-none">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="background:linear-gradient(135deg,#dc2626,#7f1d1d);">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-3">
+                                                    <i class="fa fa-times-circle fa-3x text-white opacity-75"></i>
+                                                </div>
+                                                <div class="col-9 text-end">
+                                                    <h6 class="text-white mb-1">Visa Rejected</h6>
+                                                    <h2 class="text-white mb-0 fw-bold" t-esc="visa_rejected_count"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- 9. In-Active Students -->
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <a href="/my/agent/students/inactive" class="text-decoration-none">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="background:linear-gradient(135deg,#6b7280,#374151);">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-3">
+                                                    <i class="fa fa-user-times fa-3x text-white opacity-75"></i>
+                                                </div>
+                                                <div class="col-9 text-end">
+                                                    <h6 class="text-white mb-1">In-Active Students</h6>
+                                                    <h2 class="text-white mb-0 fw-bold" t-esc="inactive_students_count"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                        </div>
+
+                        <!-- =============================== -->
+                        <!-- My Students Table              -->
+                        <!-- With Stage & Status columns    -->
+                        <!-- =============================== -->
+                        <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;overflow:hidden;">
+                            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-list-alt text-primary me-2"></i>
+                                    <h5 class="mb-0 fw-bold text-primary">My Students</h5>
+                                    <t t-if="active_country_filter">
+                                        <span class="badge bg-primary ms-2" style="font-size:12px;">
+                                            <t t-foreach="student_countries" t-as="sc">
+                                                <t t-if="sc.id == int(active_country_filter)">
+                                                    <t t-esc="sc.name"/>
+                                                </t>
+                                            </t>
+                                        </span>
+                                        <a href="/my/home" class="btn btn-sm btn-link text-danger p-0 ms-1" title="Clear filter">
+                                            <i class="fa fa-times-circle"></i>
+                                        </a>
+                                    </t>
+                                </div>
+                                <!-- Country Filter -->
+                                <t t-if="student_countries">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary rounded-pill dropdown-toggle px-3"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fa fa-filter me-1"></i>
+                                            <t t-if="active_country_filter">Filter: On</t>
+                                            <t t-else="">Filter by Country</t>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                            <li>
+                                                <a class="dropdown-item" href="/my/home">
+                                                    <i class="fa fa-globe me-1 text-muted"></i> All Countries
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"/></li>
+                                            <t t-foreach="student_countries" t-as="sc">
+                                                <li>
+                                                    <a class="dropdown-item" t-attf-href="/my/home?country=#{sc.id}">
+                                                        <t t-esc="sc.name"/>
+                                                    </a>
+                                                </li>
+                                            </t>
+                                        </ul>
+                                    </div>
+                                </t>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0 align-middle">
+                                        <thead style="background:#f8f9fa;">
+                                            <tr>
+                                                <th class="ps-4 py-3 text-muted fw-semibold" style="font-size:13px;">Student</th>
+                                                <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Contact</th>
+                                                <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Programs</th>
+                                                <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Documents</th>
+                                                <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Stage</th>
+                                                <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Status</th>
+                                                <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="filtered_students" t-as="student">
+                                                <!-- Get best progress active program for this student -->
+                                                <t t-set="lp" t-value="student_best_program.get(student.id, False)"/>
+                                                <tr t-attf-onclick="window.location.href='/my/agent/student/#{student.id}'"
+                                                    style="cursor:pointer;transition:background .15s;"
+                                                    onmouseover="this.style.background='#f0f7ff'"
+                                                    onmouseout="this.style.background=''">
+                                                    <td class="ps-4 py-3">
+                                                        <div class="d-flex align-items-center gap-3">
+                                                            <t t-if="student.photo">
+                                                                <img t-attf-src="data:image/png;base64,{{student.photo.decode('utf-8')}}"
+                                                                     class="rounded-circle" style="width:40px;height:40px;object-fit:cover;flex-shrink:0;"/>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                                                                    <i class="fa fa-user text-muted"></i>
+                                                                </div>
+                                                            </t>
+                                                            <div>
+                                                                <div class="fw-bold text-dark" style="font-size:14px;"><t t-esc="student.name"/></div>
+                                                                <div class="text-muted" style="font-size:12px;"><t t-esc="student.student_id_string or ''"/></div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-3">
+                                                        <div style="font-size:13px;">
+                                                            <div t-if="student.email" class="mb-1">
+                                                                <i class="fa fa-envelope-o me-1 text-muted"></i><t t-esc="student.email"/>
+                                                            </div>
+                                                            <div t-if="student.mobile">
+                                                                <i class="fa fa-phone me-1 text-muted"></i><t t-esc="student.mobile"/>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <!-- Programs count -->
+                                                    <td class="py-3">
+                                                        <span class="badge rounded-pill px-3 py-2" style="background:#dbeafe;color:#1d4ed8;font-size:12px;">
+                                                            <t t-esc="len(student.program_ids.filtered(lambda p: p.active))"/> Active
+                                                        </span>
+                                                    </td>
+                                                    <!-- Documents status -->
+                                                    <td class="py-3">
+                                                        <t t-set="std_missing" t-value="len(student.document_line_ids.filtered(lambda d: d.priority == 'required' and d.state == 'not_received'))"/>
+                                                        <t t-if="std_missing > 0">
+                                                            <span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:12px;">
+                                                                Missing <t t-esc="std_missing"/>
+                                                            </span>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">All Received</span>
+                                                        </t>
+                                                    </td>
+                                                    <!-- Stage: latest active program's stage name -->
+                                                    <td class="py-3">
+                                                        <t t-if="lp">
+                                                            <span class="badge rounded-pill px-3 py-2" style="background:#e5e7eb;color:#374151;font-size:12px;">
+                                                                <t t-if="lp.stage_code == 'applied'">Applied to University</t>
+                                                                <t t-else=""><t t-esc="lp.stage_id.name or '—'"/></t>
+                                                            </span>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span class="text-muted" style="font-size:12px;">—</span>
+                                                        </t>
+                                                    </td>
+                                                    <!-- Status: sub-state within that stage -->
+                                                    <td class="py-3">
+                                                        <t t-if="lp">
+                                                            <!-- Applied stage -->
+                                                            <t t-if="lp.stage_code == 'applied'">
+                                                                <t t-if="lp.apply_state == 'submit'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#dbeafe;color:#1d4ed8;font-size:12px;">Submitted</span>
+                                                                </t>
+                                                                <t t-elif="lp.apply_state == 'in_progress'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fef3c7;color:#92400e;font-size:12px;">In Progress</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#e5e7eb;color:#374151;font-size:12px;">Pending</span>
+                                                                </t>
+                                                            </t>
+                                                            <!-- Offer Letter stage -->
+                                                            <t t-elif="lp.stage_code == 'offer_letter'">
+                                                                <t t-if="lp.offer_letter_state == 'accepted'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">Accepted</span>
+                                                                </t>
+                                                                <t t-elif="lp.offer_letter_state == 'rejected'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:12px;">Rejected</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#dbeafe;color:#1d4ed8;font-size:12px;">Issued</span>
+                                                                </t>
+                                                            </t>
+                                                            <!-- Tuition Fee stage -->
+                                                            <t t-elif="lp.stage_code == 'tuition_fee'">
+                                                                <t t-if="lp.tuition_fee_state == 'paid'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">Paid</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:12px;">Unpaid</span>
+                                                                </t>
+                                                            </t>
+                                                            <!-- Sponsor / Document stage -->
+                                                            <t t-elif="lp.stage_code == 'sponsor_document'">
+                                                                <t t-if="lp.sponsor_and_document_state == 'file_ready'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">File Ready</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fef3c7;color:#92400e;font-size:12px;">In Progress</span>
+                                                                </t>
+                                                            </t>
+                                                            <!-- Visa Processing stage -->
+                                                            <t t-elif="lp.stage_code == 'visa_processing'">
+                                                                <t t-if="lp.visa_state == 'approve'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">Approved</span>
+                                                                </t>
+                                                                <t t-elif="lp.visa_state == 'reject'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:12px;">Rejected</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#dbeafe;color:#1d4ed8;font-size:12px;">Applied</span>
+                                                                </t>
+                                                            </t>
+                                                            <!-- GS stage -->
+                                                            <t t-elif="lp.stage_code == 'gs_state'">
+                                                                <t t-if="lp.gs_state == 'approve'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">GS Approved</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fef3c7;color:#92400e;font-size:12px;">GS Submitted</span>
+                                                                </t>
+                                                            </t>
+                                                            <!-- Final Offer stage -->
+                                                            <t t-elif="lp.stage_code == 'final_offer'">
+                                                                <t t-if="lp.final_offer_state == 'received'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">Received</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#e5e7eb;color:#374151;font-size:12px;">Pending</span>
+                                                                </t>
+                                                            </t>
+                                                            <!-- Other stages: no specific status -->
+                                                            <t t-else="">
+                                                                <span class="text-muted" style="font-size:12px;">—</span>
+                                                            </t>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span class="text-muted" style="font-size:12px;">—</span>
+                                                        </t>
+                                                    </td>
+                                                    <td class="py-3">
+                                                        <a t-attf-href="/my/agent/student/#{student.id}"
+                                                           onclick="event.stopPropagation()"
+                                                           class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                                                           style="font-size:12px;">
+                                                            View Details
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                            <t t-if="not filtered_students">
+                                                <tr>
+                                                    <td colspan="7" class="text-center py-5 text-muted">
+                                                        <i class="fa fa-users fa-3x mb-3 d-block" style="opacity:.2;"></i>
+                                                        <t t-if="active_country_filter">
+                                                            <p class="mb-1">No students found for this country.</p>
+                                                            <a href="/my/home" class="btn btn-sm btn-outline-secondary rounded-pill mt-2">Clear Filter</a>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <p class="mb-0">No students assigned to you yet.</p>
+                                                        </t>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Agent Card Detail Page                                              -->
+    <!-- ================================================================== -->
+    <template id="agent_card_detail" name="Agent Card Detail">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'dashboard'"/>
+            <div class="container-fluid px-3 px-lg-4">
+                <div class="row">
+                    <t t-call="dsl_student_portal.agent_sidebar"/>
+
+                    <div class="col-lg-9 col-md-8 col-12 py-3">
+
+                        <!-- Breadcrumb + Back -->
+                        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                            <div>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb mb-1 small">
+                                        <li class="breadcrumb-item"><a href="/my/home">Home</a></li>
+                                        <li class="breadcrumb-item"><a href="/my">Dashboard</a></li>
+                                        <li class="breadcrumb-item active"><t t-esc="page_title"/></li>
+                                    </ol>
+                                </nav>
+                                <h4 class="mb-0 fw-bold">
+                                    <i class="fa fa-list me-2 text-primary"></i><t t-esc="page_title"/>
+                                </h4>
+                            </div>
+                            <a href="/my" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                <i class="fa fa-arrow-left me-1"></i> Back to Dashboard
+                            </a>
+                        </div>
+
+                        <!-- Filter Tabs -->
+                        <t t-if="filter_tabs">
+                            <div class="mb-3 d-flex flex-wrap gap-2">
+                                <t t-foreach="filter_tabs" t-as="tab">
+                                    <t t-if="not tab['key']">
+                                        <t t-if="card_type == 'submitted'">
+                                            <a href="/my/agent/students/apply"
+                                               t-attf-class="btn btn-sm rounded-pill px-3 #{'' if not active_filter else 'btn-outline-'}secondary">All</a>
+                                        </t>
+                                        <t t-elif="card_type == 'offer'">
+                                            <a href="/my/agent/students/offer"
+                                               t-attf-class="btn btn-sm rounded-pill px-3 #{'' if not active_filter else 'btn-outline-'}secondary">All</a>
+                                        </t>
+                                        <t t-elif="card_type == 'documentation'">
+                                            <a href="/my/agent/students/documentation"
+                                               t-attf-class="btn btn-sm rounded-pill px-3 #{'' if not active_filter else 'btn-outline-'}secondary">All</a>
+                                        </t>
+                                        <t t-elif="card_type == 'visa'">
+                                            <a href="/my/agent/students/visa"
+                                               t-attf-class="btn btn-sm rounded-pill px-3 #{'' if not active_filter else 'btn-outline-'}secondary">All</a>
+                                        </t>
+                                        <t t-elif="card_type == 'tuition'">
+                                            <a href="/my/agent/students/tuition"
+                                               t-attf-class="btn btn-sm rounded-pill px-3 #{'' if not active_filter else 'btn-outline-'}secondary">All</a>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-if="card_type == 'submitted'">
+                                            <a t-attf-href="/my/agent/students/apply?state=#{tab['key']}"
+                                               t-attf-class="btn btn-sm rounded-pill px-3 #{'' if active_filter == tab['key'] else 'btn-outline-'}#{tab['color']}">
+                                                <t t-esc="tab['label']"/>
+                                            </a>
+                                        </t>
+                                        <t t-elif="card_type == 'offer'">
+                                            <a t-attf-href="/my/agent/students/offer?state=#{tab['key']}"
+                                               t-attf-class="btn btn-sm rounded-pill px-3 #{'' if active_filter == tab['key'] else 'btn-outline-'}#{tab['color']}">
+                                                <t t-esc="tab['label']"/>
+                                            </a>
+                                        </t>
+                                        <t t-elif="card_type == 'documentation'">
+                                            <a t-attf-href="/my/agent/students/documentation?state=#{tab['key']}"
+                                               t-attf-class="btn btn-sm rounded-pill px-3 #{'' if active_filter == tab['key'] else 'btn-outline-'}#{tab['color']}">
+                                                <t t-esc="tab['label']"/>
+                                            </a>
+                                        </t>
+                                        <t t-elif="card_type == 'visa'">
+                                            <a t-attf-href="/my/agent/students/visa?state=#{tab['key']}"
+                                               t-attf-class="btn btn-sm rounded-pill px-3 #{'' if active_filter == tab['key'] else 'btn-outline-'}#{tab['color']}">
+                                                <t t-esc="tab['label']"/>
+                                            </a>
+                                        </t>
+                                        <t t-elif="card_type == 'tuition'">
+                                            <a t-attf-href="/my/agent/students/tuition?state=#{tab['key']}"
+                                               t-attf-class="btn btn-sm rounded-pill px-3 #{'' if active_filter == tab['key'] else 'btn-outline-'}#{tab['color']}">
+                                                <t t-esc="tab['label']"/>
+                                            </a>
+                                        </t>
+                                    </t>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- My Students Table (card_type == students) -->
+                        <t t-if="card_type == 'students'">
+                            <div class="card border-0 shadow-sm" style="border-radius:12px;overflow:hidden;">
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0 align-middle">
+                                            <thead style="background:#f8f9fa;">
+                                                <tr>
+                                                    <th class="ps-4 py-3 text-muted fw-semibold" style="font-size:13px;">Student</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Contact</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Programs</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Documents</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Stage</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Status</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="students" t-as="student">
+                                                    <t t-set="latest_prog" t-value="student.program_ids.filtered(lambda p: p.active).sorted(key=lambda p: (
+                                                        (100 if (p.stage_code == 'visa_processing' and p.visa_state in ['approve', 'reject']) else
+                                                        100 if p.stage_code == 'done' else
+                                                        80  if (p.stage_code == 'visa_processing' and p.visa_state == 'apply') else
+                                                        60  if (p.stage_code == 'final_offer' and p.final_offer_state == 'received') else
+                                                        60  if p.stage_code == 'visa_documentation' else
+                                                        40  if p.stage_code == 'final_offer' else
+                                                        40  if p.stage_code == 'tuition_fee' else
+                                                        40  if p.stage_code == 'gs_state' else
+                                                        40  if p.stage_code == 'sponsor_document' else
+                                                        40  if p.stage_code == 'offer_letter' else
+                                                        40  if (p.stage_code == 'applied' and p.apply_state == 'submit') else
+                                                        20  if p.stage_code == 'applied' else
+                                                        20  if p.stage_code == 'confirmed' else
+                                                        0) * 100
+                                                        +
+                                                        (90 if p.stage_code == 'gs_state' and p.gs_state == 'approve' else
+                                                        70 if p.stage_code == 'gs_state' and p.gs_state in ['revised', 'in_progress'] else
+                                                        90 if p.stage_code == 'offer_letter' and p.offer_letter_state == 'accepted' else
+                                                        70 if p.stage_code == 'offer_letter' and p.offer_letter_state == 'issued' else
+                                                        90 if p.stage_code == 'tuition_fee' and p.tuition_fee_state == 'paid' else
+                                                        90 if p.stage_code == 'applied' and p.apply_state == 'submit' else
+                                                        50 if p.stage_code == 'applied' and p.apply_state == 'in_progress' else
+                                                        0)
+                                                    ), reverse=True)[:1]"/>
+                                                    <t t-set="lp" t-value="latest_prog[0] if latest_prog else False"/>
+                                                    <tr t-attf-onclick="window.location.href='/my/agent/student/#{student.id}'"
+                                                        style="cursor:pointer;transition:background .15s;"
+                                                        onmouseover="this.style.background='#f0f7ff'"
+                                                        onmouseout="this.style.background=''">
+                                                        <td class="ps-4 py-3">
+                                                            <div class="d-flex align-items-center gap-3">
+                                                                <t t-if="student.photo">
+                                                                    <img t-attf-src="data:image/png;base64,{{student.photo.decode('utf-8')}}"
+                                                                         class="rounded-circle flex-shrink-0" style="width:38px;height:38px;object-fit:cover;"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width:38px;height:38px;">
+                                                                        <i class="fa fa-user text-muted"></i>
+                                                                    </div>
+                                                                </t>
+                                                                <div>
+                                                                    <div class="fw-bold text-dark" style="font-size:14px;"><t t-esc="student.name"/></div>
+                                                                    <div class="text-muted" style="font-size:12px;"><t t-esc="student.student_id_string or ''"/></div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="py-3" style="font-size:13px;">
+                                                            <div t-if="student.email" class="mb-1"><i class="fa fa-envelope-o me-1 text-muted"></i><t t-esc="student.email"/></div>
+                                                            <div t-if="student.mobile"><i class="fa fa-phone me-1 text-muted"></i><t t-esc="student.mobile"/></div>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <span class="badge rounded-pill px-3 py-2" style="background:#dbeafe;color:#1d4ed8;font-size:12px;">
+                                                                <t t-esc="len(student.program_ids.filtered(lambda p: p.active))"/> Active
+                                                            </span>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <t t-set="std_missing" t-value="len(student.document_line_ids.filtered(lambda d: d.priority == 'required' and d.state == 'not_received'))"/>
+                                                            <t t-if="std_missing > 0">
+                                                                <span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:12px;">Missing <t t-esc="std_missing"/></span>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">All Received</span>
+                                                            </t>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <t t-if="lp">
+                                                                <span class="badge rounded-pill px-3 py-2" style="background:#e5e7eb;color:#374151;font-size:12px;">
+                                                                    <t t-if="lp.stage_code == 'applied'">Applied to University</t>
+                                                                    <t t-else=""><t t-esc="lp.stage_id.name or '—'"/></t>
+                                                                </span>
+                                                            </t>
+                                                            <t t-else=""><span class="text-muted" style="font-size:12px;">—</span></t>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <t t-if="lp">
+                                                                <t t-if="lp.stage_code == 'applied'">
+                                                                    <t t-if="lp.apply_state == 'submit'"><span class="badge rounded-pill px-3 py-2" style="background:#dbeafe;color:#1d4ed8;font-size:12px;">Submitted</span></t>
+                                                                    <t t-elif="lp.apply_state == 'in_progress'"><span class="badge rounded-pill px-3 py-2" style="background:#fef3c7;color:#92400e;font-size:12px;">In Progress</span></t>
+                                                                    <t t-else=""><span class="badge rounded-pill px-3 py-2" style="background:#e5e7eb;color:#374151;font-size:12px;">Pending</span></t>
+                                                                </t>
+                                                                <t t-elif="lp.stage_code == 'offer_letter'">
+                                                                    <t t-if="lp.offer_letter_state == 'accepted'"><span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">Accepted</span></t>
+                                                                    <t t-elif="lp.offer_letter_state == 'rejected'"><span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:12px;">Rejected</span></t>
+                                                                    <t t-else=""><span class="badge rounded-pill px-3 py-2" style="background:#dbeafe;color:#1d4ed8;font-size:12px;">Issued</span></t>
+                                                                </t>
+                                                                <t t-elif="lp.stage_code == 'tuition_fee'">
+                                                                    <t t-if="lp.tuition_fee_state == 'paid'"><span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">Paid</span></t>
+                                                                    <t t-else=""><span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:12px;">Unpaid</span></t>
+                                                                </t>
+                                                                <t t-elif="lp.stage_code == 'sponsor_document'">
+                                                                    <t t-if="lp.sponsor_and_document_state == 'file_ready'"><span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">File Ready</span></t>
+                                                                    <t t-else=""><span class="badge rounded-pill px-3 py-2" style="background:#fef3c7;color:#92400e;font-size:12px;">In Progress</span></t>
+                                                                </t>
+                                                                <t t-elif="lp.stage_code == 'visa_processing'">
+                                                                    <t t-if="lp.visa_state == 'approve'"><span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">Approved</span></t>
+                                                                    <t t-elif="lp.visa_state == 'reject'"><span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:12px;">Rejected</span></t>
+                                                                    <t t-else=""><span class="badge rounded-pill px-3 py-2" style="background:#dbeafe;color:#1d4ed8;font-size:12px;">Applied</span></t>
+                                                                </t>
+                                                                <t t-elif="lp.stage_code == 'gs_state'">
+                                                                    <t t-if="lp.gs_state == 'approve'"><span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">GS Approved</span></t>
+                                                                    <t t-else=""><span class="badge rounded-pill px-3 py-2" style="background:#fef3c7;color:#92400e;font-size:12px;">GS Submitted</span></t>
+                                                                </t>
+                                                                <t t-elif="lp.stage_code == 'final_offer'">
+                                                                    <t t-if="lp.final_offer_state == 'received'"><span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:12px;">Received</span></t>
+                                                                    <t t-else=""><span class="badge rounded-pill px-3 py-2" style="background:#e5e7eb;color:#374151;font-size:12px;">Pending</span></t>
+                                                                </t>
+                                                                <t t-else=""><span class="badge rounded-pill px-3 py-2" style="background:#e5e7eb;color:#374151;font-size:12px;"><t t-esc="lp.stage_code or '—'"/></span></t>
+                                                            </t>
+                                                            <t t-else=""><span class="text-muted" style="font-size:12px;">—</span></t>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <a t-attf-href="/my/agent/student/#{student.id}"
+                                                               onclick="event.stopPropagation()"
+                                                               class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size:12px;">View Details</a>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                                <t t-if="not students">
+                                                    <tr>
+                                                        <td colspan="7" class="text-center py-5 text-muted">
+                                                            <i class="fa fa-users fa-3x mb-3 d-block" style="opacity:.2;"></i>No students found.
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- In-Active Students Table — Student, Contact, Lost Reason, Action only -->
+                        <t t-if="card_type == 'inactive'">
+                            <div class="card border-0 shadow-sm" style="border-radius:12px;overflow:hidden;">
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0 align-middle">
+                                            <thead style="background:#f8f9fa;">
+                                                <tr>
+                                                    <th class="ps-4 py-3 text-muted fw-semibold" style="font-size:13px;">Student</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Contact</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Reason</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="students" t-as="student">
+                                                    <tr t-attf-onclick="window.location.href='/my/agent/student/#{student.id}'"
+                                                        style="cursor:pointer;transition:background .15s;"
+                                                        onmouseover="this.style.background='#fff5f5'"
+                                                        onmouseout="this.style.background=''">
+                                                        <td class="ps-4 py-3">
+                                                            <div class="d-flex align-items-center gap-3">
+                                                                <t t-if="student.photo">
+                                                                    <img t-attf-src="data:image/png;base64,{{student.photo.decode('utf-8')}}"
+                                                                         class="rounded-circle flex-shrink-0" style="width:38px;height:38px;object-fit:cover;"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width:38px;height:38px;">
+                                                                        <i class="fa fa-user text-muted"></i>
+                                                                    </div>
+                                                                </t>
+                                                                <div>
+                                                                    <div class="fw-bold text-dark" style="font-size:14px;"><t t-esc="student.name"/></div>
+                                                                    <div class="text-muted" style="font-size:12px;"><t t-esc="student.student_id_string or ''"/></div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="py-3" style="font-size:13px;">
+                                                            <div t-if="student.email" class="mb-1"><i class="fa fa-envelope-o me-1 text-muted"></i><t t-esc="student.email"/></div>
+                                                            <div t-if="student.mobile"><i class="fa fa-phone me-1 text-muted"></i><t t-esc="student.mobile"/></div>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <t t-if="student.lost_reason_id">
+                                                                <span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:12px;">
+                                                                    <i class="fa fa-times-circle me-1"></i>
+                                                                    <t t-esc="student.lost_reason_id.name"/>
+                                                                </span>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <span class="text-muted" style="font-size:12px;">—</span>
+                                                            </t>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <a t-attf-href="/my/agent/student/#{student.id}"
+                                                               onclick="event.stopPropagation()"
+                                                               class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size:12px;">View Details</a>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                                <t t-if="not students">
+                                                    <tr>
+                                                        <td colspan="4" class="text-center py-5 text-muted">
+                                                            <i class="fa fa-users fa-3x mb-3 d-block" style="opacity:.2;"></i>No inactive students found.
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Program Lines Table -->
+                        <t t-if="card_type not in ('students', 'inactive')">
+                            <div class="card border-0 shadow-sm" style="border-radius:12px;overflow:hidden;">
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0 align-middle">
+                                            <thead style="background:#f8f9fa;">
+                                                <tr>
+                                                    <th class="ps-4 py-3 text-muted fw-semibold" style="font-size:13px;">Student</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Country</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Institute</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Program</th>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Stage</th>
+                                                    <t t-if="card_type != 'applications'">
+                                                        <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Status</th>
+                                                    </t>
+                                                    <th class="py-3 text-muted fw-semibold" style="font-size:13px;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="program_lines" t-as="pl">
+                                                    <tr t-attf-onclick="window.location.href='/my/agent/student/#{pl.student_id.id}'"
+                                                        style="cursor:pointer;transition:background .15s;"
+                                                        onmouseover="this.style.background='#f0f7ff'"
+                                                        onmouseout="this.style.background=''">
+                                                        <td class="ps-4 py-3">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <t t-if="pl.student_id.photo">
+                                                                    <img t-attf-src="data:image/png;base64,{{pl.student_id.photo.decode('utf-8')}}"
+                                                                         class="rounded-circle flex-shrink-0" style="width:34px;height:34px;object-fit:cover;"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width:34px;height:34px;">
+                                                                        <i class="fa fa-user text-muted" style="font-size:12px;"></i>
+                                                                    </div>
+                                                                </t>
+                                                                <div>
+                                                                    <div class="fw-bold text-dark" style="font-size:13px;"><t t-esc="pl.student_id.name"/></div>
+                                                                    <div class="text-muted" style="font-size:11px;"><t t-esc="pl.student_id.student_id_string or ''"/></div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="py-3" style="font-size:13px;"><t t-esc="pl.country_id.name or '—'"/></td>
+                                                        <td class="py-3" style="font-size:13px;"><t t-esc="pl.institute_id.name or '—'"/></td>
+                                                        <td class="py-3" style="font-size:13px;"><t t-esc="pl.program_id.name or '—'"/></td>
+                                                        <td class="py-3">
+                                                            <span class="badge rounded-pill px-3 py-2" style="background:#e5e7eb;color:#374151;font-size:11px;">
+                                                                <t t-if="pl.stage_code == 'applied'">Applied to University</t>
+                                                                <t t-else=""><t t-esc="pl.stage_id.name or '—'"/></t>
+                                                            </span>
+                                                        </td>
+                                                        <!-- Status badge per card type -->
+                                                        <t t-if="card_type == 'submitted'">
+                                                            <td class="py-3">
+                                                                <t t-if="pl.apply_state == 'submit'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#dbeafe;color:#1d4ed8;font-size:11px;">Submit</span>
+                                                                </t>
+                                                                <t t-elif="pl.apply_state == 'in_progress'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fef3c7;color:#92400e;font-size:11px;">In Progress</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#e5e7eb;color:#374151;font-size:11px;">Pending</span>
+                                                                </t>
+                                                            </td>
+                                                        </t>
+                                                        <t t-if="card_type == 'offer'">
+                                                            <td class="py-3">
+                                                                <t t-if="pl.final_offer_state == 'received'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:11px;">Received</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fef3c7;color:#92400e;font-size:11px;">Not Received</span>
+                                                                </t>
+                                                            </td>
+                                                        </t>
+                                                        <t t-if="card_type == 'documentation'">
+                                                            <td class="py-3">
+                                                                <t t-if="pl.sponsor_and_document_state == 'file_ready'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:11px;">File Ready</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fef3c7;color:#92400e;font-size:11px;">In Progress</span>
+                                                                </t>
+                                                            </td>
+                                                        </t>
+                                                        <t t-if="card_type == 'visa'">
+                                                            <td class="py-3">
+                                                                <t t-if="pl.visa_state == 'apply'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#dbeafe;color:#1d4ed8;font-size:11px;">Applied</span>
+                                                                </t>
+                                                                <t t-elif="pl.visa_state == 'approve'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:11px;">Approved</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:11px;">Rejected</span>
+                                                                </t>
+                                                            </td>
+                                                        </t>
+                                                        <t t-if="card_type == 'tuition'">
+                                                            <td class="py-3">
+                                                                <t t-if="pl.tuition_fee_state == 'paid'">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5;color:#065f46;font-size:11px;">Paid</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="badge rounded-pill px-3 py-2" style="background:#fee2e2;color:#991b1b;font-size:11px;">Unpaid</span>
+                                                                </t>
+                                                            </td>
+                                                        </t>
+                                                        <td class="py-3">
+                                                            <a t-attf-href="/my/agent/student/#{pl.student_id.id}"
+                                                               onclick="event.stopPropagation()"
+                                                               class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size:12px;">
+                                                                View Student
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                                <t t-if="not program_lines">
+                                                    <tr>
+                                                        <td colspan="7" class="text-center py-5 text-muted">
+                                                            <i class="fa fa-inbox fa-3x mb-3 d-block" style="opacity:.2;"></i>
+                                                            No records found.
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

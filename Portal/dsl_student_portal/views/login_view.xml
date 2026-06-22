@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- =====================================================================
+         Outer auth layout: full-screen watercolor stage + center blue panel.
+         The page-specific content (chooser / forms / reset password) is
+         injected through <t t-out="0"/>.
+         ===================================================================== -->
+    <template id="custom_log" inherit_id="web.login_layout">
+        <xpath expr="//div[1]" position="replace">
+            <div class="ds-login-root">
+                <div t-attf-class="ds-panel {{login_card_classes}}">
+                    <div class="ds-panel-logo">
+                        <img src="/dsl_student_portal/static/src/img/logo_dream_study.png"
+                             alt="Dream Study International"/>
+                    </div>
+
+                    <div class="ds-panel-body">
+                        <t t-out="0"/>
+                    </div>
+
+                    <div class="ds-panel-footer" t-if="not disable_footer">
+                        <t t-if="not disable_database_manager">
+                            <span class="border-end pe-2 me-1">Study Abroad</span>
+                        </t>
+                        <a href="https://daffodilsoft.com/" target="_blank">
+                            Powered by: <span>Daffodil Software Ltd.</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- =====================================================================
+         Login content: designation chooser + per-type login forms.
+         ===================================================================== -->
+    <template id="dsl_login_page" inherit_id="web.login">
+        <xpath expr="//form[hasclass('oe_login_form')]" position="replace">
+
+            <!-- Designation chooser (default screen) -->
+            <t t-if="not request.params.get('type')">
+                <h1 class="ds-title">Sign in to Your <span class="ds-accent">Portal</span></h1>
+                <p class="ds-subtitle">
+                    Whether you're a student, employee, agent or administrator,
+                    please choose the login button that matches your designation.
+                </p>
+
+                <div class="ds-choose">
+                    <a href="/web/login?type=student" class="btn ds-choose-btn">Student</a>
+                    <a href="/web/login?type=admin" class="btn ds-choose-btn">Employee</a>
+                    <a href="/web/login?type=admin" class="btn ds-choose-btn">Admin</a>
+                    <a href="/web/login?type=agent" class="btn ds-choose-btn">Agent</a>
+                </div>
+
+                <div class="ds-countries">
+                    <img src="/dsl_student_portal/static/src/img/countries/canada.png" alt="Canada"/>
+                    <img src="/dsl_student_portal/static/src/img/countries/australia.png" alt="Australia"/>
+                    <img src="/dsl_student_portal/static/src/img/countries/new_zealand.png" alt="New Zealand"/>
+                    <img src="/dsl_student_portal/static/src/img/countries/united_kingdom.png" alt="United Kingdom"/>
+                    <img src="/dsl_student_portal/static/src/img/countries/united_states.png" alt="United States"/>
+                    <img src="/dsl_student_portal/static/src/img/countries/europe.png" alt="Europe"/>
+                </div>
+
+                <div class="ds-stats">
+                    <div class="ds-stat">
+                        <span class="ds-stat-num">2000+</span>
+                        <span class="ds-stat-label">Dreams Fulfilled!</span>
+                    </div>
+                    <div class="ds-stat">
+                        <span class="ds-stat-num">800+</span>
+                        <span class="ds-stat-label">Affiliated Universities!</span>
+                    </div>
+                    <div class="ds-stat">
+                        <span class="ds-stat-num">75%</span>
+                        <span class="ds-stat-label">Scholarships!</span>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Shared login form (admin / student / agent) -->
+            <t t-set="login_type" t-value="request.params.get('type')"/>
+            <t t-if="login_type in ('admin', 'student', 'agent')">
+                <t t-set="is_admin" t-value="login_type == 'admin'"/>
+                <h1 class="ds-title">
+                    <t t-if="is_admin">Office Login</t>
+                    <t t-elif="login_type == 'student'">Student Login</t>
+                    <t t-else="">Agent Login</t>
+                </h1>
+
+                <t t-if="error">
+                    <div class="alert alert-danger" role="alert"><t t-esc="error"/></div>
+                </t>
+                <t t-if="message">
+                    <div class="alert alert-success" role="alert"><t t-esc="message"/></div>
+                </t>
+
+                <form method="post" action="/web/login" class="oe_login_form ds-form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="type" t-att-value="login_type"/>
+                    <input type="hidden" name="redirect" t-att-value="redirect"/>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <t t-if="is_admin">Username</t>
+                            <t t-else="">Email Address</t>
+                        </label>
+                        <input type="text" name="login" class="form-control"
+                               t-att-placeholder="'Enter username' if is_admin else 'Enter your email'"
+                               required="required" t-att-value="login or ''"
+                               autofocus="autofocus" t-att-autocapitalize="None if is_admin else 'off'"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" name="password" class="form-control dsl-password-field"
+                                   placeholder="Enter your password" required="required"
+                                   autocomplete="current-password"/>
+                            <span class="input-group-text dsl-toggle-password" style="cursor: pointer;">
+                                <i class="fa fa-eye"/>
+                            </span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn ds-submit">Login</button>
+
+                    <div class="ds-links">
+                        <a href="/web/reset_password">Forgot Password?</a>
+                        <span class="ds-sep">·</span>
+                        <a href="/web/login"><i class="fa fa-arrow-left"/> Back</a>
+                    </div>
+                </form>
+            </t>
+
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.querySelectorAll('.dsl-toggle-password').forEach(function (toggle) {
+                        toggle.addEventListener('click', function () {
+                            var input = toggle.parentElement.querySelector('.dsl-password-field');
+                            var icon = toggle.querySelector('i');
+                            if (input.type === 'password') {
+                                input.type = 'text';
+                                icon.classList.remove('fa-eye');
+                                icon.classList.add('fa-eye-slash');
+                            } else {
+                                input.type = 'password';
+                                icon.classList.remove('fa-eye-slash');
+                                icon.classList.add('fa-eye');
+                            }
+                        });
+                    });
+                });
+            </script>
+
+        </xpath>
+    </template>
+
+    <!-- Hide the "Manage Databases" link on the login page -->
+    <template id="hide_manage_database" inherit_id="hide_powered_by_odoo.login_page_layout"
+              name="Hide Manage Database">
+        <xpath expr="//a[@href='/web/database/manager']" position="replace"/>
+    </template>
+
+    <!-- Brand promotion logo swap -->
+    <template id="custom_brand_logo" inherit_id="web.brand_promotion_message"
+              name="Custom Brand Logo">
+        <xpath expr="//t[@t-set='odoo_logo']" position="replace">
+            <t t-set="odoo_logo">
+                <img alt="Daffodil Family"
+                     src="/dsl_student_portal/static/description/daffodil_family_logo.png"
+                     style="width: auto; height: 1.2em; vertical-align: baseline;"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

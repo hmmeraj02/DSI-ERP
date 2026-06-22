@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="agent_sidebar" name="Agent Sidebar">
+        <div class="col-lg-3 col-md-4 col-12 mb-4">
+            <div class="dsl-sidebar">
+
+                <style>
+                    .dsl-sidebar {
+                        border-radius: 16px;
+                        overflow: hidden;
+                        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+                        background: #1a1f2e;
+                        font-family: 'Segoe UI', sans-serif;
+                    }
+
+                    /* ── Profile Header ── */
+                    .dsl-sidebar .sidebar-header {
+                        background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 50%, #1a1f2e 100%);
+                        padding: 28px 20px 22px;
+                        text-align: center;
+                        position: relative;
+                    }
+                    .dsl-sidebar .sidebar-header::after {
+                        content: '';
+                        position: absolute;
+                        bottom: 0; left: 0; right: 0;
+                        height: 1px;
+                        background: linear-gradient(90deg, transparent, rgba(99,179,237,0.4), transparent);
+                    }
+                    .dsl-sidebar .sidebar-avatar {
+                        width: 88px; height: 88px;
+                        border-radius: 50%;
+                        object-fit: cover;
+                        border: 3px solid rgba(99,179,237,0.5);
+                        box-shadow: 0 0 0 4px rgba(99,179,237,0.12);
+                        margin-bottom: 12px;
+                    }
+                    .dsl-sidebar .sidebar-name {
+                        color: #e8f4fd;
+                        font-size: 1rem;
+                        font-weight: 700;
+                        margin: 0 0 6px;
+                        letter-spacing: 0.3px;
+                        text-transform: capitalize;
+                    }
+                    .dsl-sidebar .sidebar-meta {
+                        color: rgba(180,210,240,0.7);
+                        font-size: 0.75rem;
+                        margin: 2px 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 5px;
+                    }
+                    .dsl-sidebar .sidebar-meta i {
+                        font-size: 0.7rem;
+                        color: rgba(99,179,237,0.6);
+                    }
+                    .dsl-sidebar .sidebar-role-badge {
+                        display: inline-block;
+                        margin-top: 8px;
+                        padding: 3px 10px;
+                        background: rgba(99,179,237,0.12);
+                        border: 1px solid rgba(99,179,237,0.25);
+                        border-radius: 20px;
+                        color: rgba(180,210,240,0.8);
+                        font-size: 0.7rem;
+                        letter-spacing: 0.8px;
+                        text-transform: uppercase;
+                    }
+
+                    /* ── Nav Menu ── */
+                    .dsl-sidebar .sidebar-nav {
+                        padding: 10px 10px 14px;
+                    }
+                    .dsl-sidebar .sidebar-nav a {
+                        display: flex;
+                        align-items: center;
+                        padding: 10px 14px;
+                        border-radius: 10px;
+                        margin-bottom: 2px;
+                        text-decoration: none;
+                        color: rgba(180,210,240,0.75);
+                        font-size: 0.875rem;
+                        font-weight: 500;
+                        transition: background 0.18s, color 0.18s, transform 0.15s;
+                        position: relative;
+                    }
+                    .dsl-sidebar .sidebar-nav a i.nav-icon {
+                        width: 28px;
+                        text-align: center;
+                        font-size: 0.9rem;
+                        color: rgba(99,179,237,0.55);
+                        flex-shrink: 0;
+                        transition: color 0.18s;
+                    }
+                    .dsl-sidebar .sidebar-nav a:hover {
+                        background: rgba(99,179,237,0.1);
+                        color: #e8f4fd;
+                        transform: translateX(2px);
+                    }
+                    .dsl-sidebar .sidebar-nav a:hover i.nav-icon {
+                        color: #63b3ed;
+                    }
+
+                    /* Active state */
+                    .dsl-sidebar .sidebar-nav a.dsl-active {
+                        background: linear-gradient(90deg, rgba(99,179,237,0.18), rgba(99,179,237,0.08));
+                        color: #e8f4fd;
+                        border-left: 3px solid #63b3ed;
+                        padding-left: 11px;
+                    }
+                    .dsl-sidebar .sidebar-nav a.dsl-active i.nav-icon {
+                        color: #63b3ed;
+                    }
+
+                    /* Status colors */
+                    .dsl-sidebar .sidebar-nav a.dsl-danger { color: #fc8181 !important; }
+                    .dsl-sidebar .sidebar-nav a.dsl-danger i.nav-icon { color: #fc8181 !important; }
+                    .dsl-sidebar .sidebar-nav a.dsl-success { color: #68d391 !important; }
+                    .dsl-sidebar .sidebar-nav a.dsl-success i.nav-icon { color: #68d391 !important; }
+
+                    /* Badges */
+                    .dsl-sidebar .nav-badge {
+                        margin-left: auto;
+                        padding: 2px 7px;
+                        border-radius: 20px;
+                        font-size: 0.68rem;
+                        font-weight: 700;
+                        line-height: 1.5;
+                    }
+                    .dsl-sidebar .nav-badge-danger {
+                        background: rgba(252,129,129,0.2);
+                        color: #fc8181;
+                        border: 1px solid rgba(252,129,129,0.35);
+                    }
+
+                    /* Divider */
+                    .dsl-sidebar .sidebar-divider {
+                        height: 1px;
+                        background: linear-gradient(90deg, transparent, rgba(99,179,237,0.15), transparent);
+                        margin: 6px 14px;
+                    }
+
+                    /* Logout special */
+                    .dsl-sidebar .sidebar-nav a.dsl-logout {
+                        color: rgba(252,129,129,0.65) !important;
+                        margin-top: 2px;
+                    }
+                    .dsl-sidebar .sidebar-nav a.dsl-logout i.nav-icon {
+                        color: rgba(252,129,129,0.5) !important;
+                    }
+                    .dsl-sidebar .sidebar-nav a.dsl-logout:hover {
+                        background: rgba(252,129,129,0.1);
+                        color: #fc8181 !important;
+                    }
+                </style>
+
+                <!-- Profile Header -->
+                <div class="sidebar-header">
+                    <t t-if="agent.photo">
+                        <img t-attf-src="data:image/png;base64,{{agent.photo.decode('utf-8')}}"
+                             class="sidebar-avatar" alt="Profile"/>
+                    </t>
+                    <t t-else="">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/9e/Male_Avatar.jpg"
+                             class="sidebar-avatar" alt="Avatar"/>
+                    </t>
+                    <h5 class="sidebar-name" t-esc="agent.name"/>
+                    <div class="sidebar-meta" t-if="agent.phone">
+                        <i class="fa fa-phone"></i>
+                        <t t-esc="agent.phone"/>
+                    </div>
+                    <div class="sidebar-meta" t-if="agent.email">
+                        <i class="fa fa-envelope"></i>
+                        <t t-esc="agent.email"/>
+                    </div>
+                    <span class="sidebar-role-badge">Agent</span>
+                </div>
+
+                <!-- Nav Menu -->
+                <div class="sidebar-nav">
+
+                    <!-- Dashboard -->
+                    <a href="/my/home"
+                       t-attf-class="#{' dsl-active' if page_name == 'dashboard' else ''}">
+                        <i class="fa fa-home nav-icon"></i>Dashboard
+                    </a>
+
+                    <!-- My Profile -->
+                    <a href="/my/profile"
+                       t-attf-class="#{' dsl-active' if page_name == 'profile' else ''}">
+                        <i class="fa fa-user nav-icon"></i>My Profile
+                    </a>
+
+                    <!-- Invoices -->
+                    <a href="/my/invoices"
+                       t-attf-class="#{' dsl-active' if page_name == 'invoices' else (' dsl-danger' if agent_invoice_status == 'danger' else ' dsl-success' if agent_invoice_status == 'success' else '')}">
+                        <i class="fa fa-file-text nav-icon"></i>Invoices
+                        <t t-if="agent_invoice_status == 'danger' and (unpaid_invoice_count or 0) > 0">
+                            <span class="nav-badge nav-badge-danger" t-esc="unpaid_invoice_count or 0"/>
+                        </t>
+                    </a>
+
+                    <!-- Student Documents -->
+                    <a href="/my/documents"
+                       t-attf-class="#{' dsl-active' if page_name == 'documents' else (' dsl-danger' if agent_document_status == 'danger' else ' dsl-success' if agent_document_status == 'success' else '')}">
+                        <i class="fa fa-folder-open nav-icon"></i>Student Documents
+                        <t t-if="agent_document_status == 'danger' and (agent_missing_docs_count or 0) > 0">
+                            <span class="nav-badge nav-badge-danger" t-esc="agent_missing_docs_count or 0"/>
+                        </t>
+                    </a>
+
+                    <div class="sidebar-divider"/>
+
+                    <!-- Commission -->
+                    <a href="/my/commission"
+                       t-attf-class="#{' dsl-active' if page_name == 'commission' else ''}">
+                        <i class="fa fa-money nav-icon"></i>Commission
+                    </a>
+
+                    <!-- Contract -->
+                    <a href="/my/contract"
+                       t-attf-class="#{' dsl-active' if page_name == 'contract' else ''}">
+                        <i class="fa fa-file-text nav-icon"></i>Contract
+                    </a>
+
+                    <!-- Communication -->
+                    <a href="/my/communication"
+                       t-attf-class="#{' dsl-active' if page_name == 'communication' else ''}">
+                        <i class="fa fa-comments nav-icon"></i>Communication
+                    </a>
+
+                    <!-- Complaints -->
+                    <a href="/my/complaints"
+                       t-attf-class="#{' dsl-active' if page_name == 'complaints' else ''}">
+                        <i class="fa fa-exclamation-circle nav-icon"></i>Complaints
+                    </a>
+
+                    <!-- Security -->
+                    <a href="/my/security"
+                       t-attf-class="#{' dsl-active' if page_name == 'security' else ''}">
+                        <i class="fa fa-lock nav-icon"></i>Security
+                    </a>
+
+                    <div class="sidebar-divider"/>
+
+                    <!-- Logout -->
+                    <a href="/web/session/logout" class="dsl-logout">
+                        <i class="fa fa-sign-out nav-icon"></i>Logout
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>

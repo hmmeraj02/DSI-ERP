@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="agent_communication" name="Agent Communication">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'communication'" />
+            <div class="container-fluid">
+                <div class="row">
+                    <!-- Left Sidebar -->
+                    <t t-call="dsl_student_portal.agent_sidebar"/>
+
+                    <!-- Main Content Area -->
+                    <div class="col-lg-9 col-md-8 col-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-comments fa-2x text-primary me-3"></i>
+                                    <h4 class="mb-0">Discussion &amp; Communication</h4>
+                                </div>
+                            </div>
+                            <div class="card-body">
+
+                                <!-- Chatter — only shown after a student is selected -->
+                                <t t-if="selected_student">
+                                    <div class="mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fa fa-comments text-primary me-2"></i>
+                                            <h6 class="mb-0">
+                                                Conversation for:
+                                                <strong t-field="selected_student.name"/>
+                                                <span class="text-muted ms-2">
+                                                    (<t t-esc="selected_student.student_id_string or selected_student.code"/>)
+                                                </span>
+                                            </h6>
+                                        </div>
+                                        <a t-attf-href="/my/agent/student/#{selected_student.id}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-user me-1"></i>
+                                            Back to Student Profile
+                                        </a>
+                                    </div>
+                                    <hr class="mt-0"/>
+                                    <t t-call="portal.message_thread">
+                                        <t t-set="object" t-value="selected_student" />
+                                        <t t-set="token" t-value="selected_student.access_token" />
+                                        <t t-set="pid" t-value="request.env.user.partner_id.id" />
+                                        <t t-set="hash" t-value="selected_student._sign_token(request.env.user.partner_id.id)" />
+                                        <t t-set="enable_composer" t-value="True" />
+                                        <t t-set="allow_composer" t-value="True" />
+                                    </t>
+                                </t>
+                                <t t-else="">
+                                    <t t-if="agent_students">
+                                        <div class="text-center text-muted py-5">
+                                            <i class="fa fa-hand-pointer-o fa-3x mb-3 d-block"></i>
+                                            <p>No student selected. Please go to a student's profile and click <strong>Start Discussion</strong>.</p>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="alert alert-info">
+                                            <i class="fa fa-info-circle me-2"></i>
+                                            No students are assigned to you yet.
+                                        </div>
+                                    </t>
+                                </t>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

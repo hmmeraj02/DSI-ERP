@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Agent Complaints Template -->
+    <template id="agent_complaints" name="Agent Complaints">
+        <t t-call="portal.portal_layout">
+            <div class="container-fluid">
+                <div class="row">
+                    <!-- Left Sidebar -->
+                    <t t-call="dsl_student_portal.agent_sidebar"/>
+
+                    <!-- Main Content Area -->
+                    <div class="col-lg-9 col-md-8 col-12">
+
+                        <!-- Success/Error Messages -->
+                        <t t-if="request.params.get('success')">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fa fa-check-circle me-2"></i>
+                                <t t-esc="request.params.get('success')" />
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </t>
+                        <t t-if="request.params.get('error')">
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fa fa-exclamation-circle me-2"></i>
+                                <t t-esc="request.params.get('error')" />
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </t>
+
+                        <!-- Page Header -->
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <div>
+                                <h4 class="mb-0">
+                                    <i class="fa fa-exclamation-circle me-2 text-primary"></i>My Complaints
+                                </h4>
+                            </div>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createComplaintModal">
+                                <i class="fa fa-plus-circle me-2"></i>Create Complaint
+                            </button>
+                        </div>
+
+                        <!-- Summary Cards -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-lg col-md-4 col-12">
+                                <div class="card border-0 shadow-sm h-100" style="background:linear-gradient(135deg,#3b82f6 0%,#1e40af 100%);">
+                                    <div class="card-body d-flex justify-content-between align-items-center">
+                                        <div class="icon-box"><i class="fa fa-list fa-2x text-white"></i></div>
+                                        <div class="text-end flex-grow-1">
+                                            <h6 class="text-white mb-1">Total</h6>
+                                            <h3 class="text-white mb-0 fw-bold" t-esc="len(complaints)" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg col-md-4 col-12">
+                                <div class="card border-0 shadow-sm h-100" style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);">
+                                    <div class="card-body d-flex justify-content-between align-items-center">
+                                        <div class="icon-box"><i class="fa fa-clock-o fa-2x text-white"></i></div>
+                                        <div class="text-end flex-grow-1">
+                                            <h6 class="text-white mb-1">Submitted</h6>
+                                            <h3 class="text-white mb-0 fw-bold" t-esc="len(complaints.filtered(lambda c: c.state == 'submit'))" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg col-md-4 col-12">
+                                <div class="card border-0 shadow-sm h-100" style="background:linear-gradient(135deg,#60a5fa 0%,#2563eb 100%);">
+                                    <div class="card-body d-flex justify-content-between align-items-center">
+                                        <div class="icon-box"><i class="fa fa-spinner fa-2x text-white"></i></div>
+                                        <div class="text-end flex-grow-1">
+                                            <h6 class="text-white mb-1">In Progress</h6>
+                                            <h3 class="text-white mb-0 fw-bold" t-esc="len(complaints.filtered(lambda c: c.state == 'in_progress'))" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg col-md-4 col-12">
+                                <div class="card border-0 shadow-sm h-100" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);">
+                                    <div class="card-body d-flex justify-content-between align-items-center">
+                                        <div class="icon-box"><i class="fa fa-check-circle fa-2x text-white"></i></div>
+                                        <div class="text-end flex-grow-1">
+                                            <h6 class="text-white mb-1">Solved</h6>
+                                            <h3 class="text-white mb-0 fw-bold" t-esc="len(complaints.filtered(lambda c: c.state == 'solved'))" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg col-md-4 col-12">
+                                <div class="card border-0 shadow-sm h-100" style="background:linear-gradient(135deg,#ef4444 0%,#b91c1c 100%);">
+                                    <div class="card-body d-flex justify-content-between align-items-center">
+                                        <div class="icon-box"><i class="fa fa-ban fa-2x text-white"></i></div>
+                                        <div class="text-end flex-grow-1">
+                                            <h6 class="text-white mb-1">Cancelled</h6>
+                                            <h3 class="text-white mb-0 fw-bold" t-esc="len(complaints.filtered(lambda c: c.state == 'cancel'))" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Complaints List -->
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-list me-2 text-primary"></i>All Complaints
+                                </h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <t t-if="complaints">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Code</th>
+                                                    <th>Subject</th>
+                                                    <th>Type</th>
+                                                    <th>Student</th>
+                                                    <th>Program</th>
+                                                    <th>Status</th>
+                                                    <th class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="complaints" t-as="complaint">
+                                                    <tr>
+                                                        <td><strong t-esc="complaint.code or '-'" /></td>
+                                                        <td t-esc="complaint.name or '-'" />
+                                                        <td t-esc="complaint.type_id.name or '-'" />
+                                                        <td>
+                                                            <t t-if="complaint.student_id">
+                                                                <span t-esc="complaint.student_id.name" />
+                                                                <t t-if="complaint.student_id.student_id_string">
+                                                                    <br/>
+                                                                    <small class="text-muted" t-esc="'[' + complaint.student_id.student_id_string + ']'" />
+                                                                </t>
+                                                            </t>
+                                                            <t t-else="">-</t>
+                                                        </td>
+                                                        <td t-esc="complaint.program_line_id.program_id.name or '-'" />
+                                                        <td>
+                                                            <span t-attf-class="badge bg-{{
+                                                                'success' if complaint.state == 'solved' else
+                                                                'primary' if complaint.state == 'in_progress' else
+                                                                'warning' if complaint.state == 'submit' else
+                                                                'danger' if complaint.state == 'cancel' else
+                                                                'info'
+                                                            }}">
+                                                                <t t-esc="complaint.state.replace('_', ' ').title()" />
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button class="btn btn-sm btn-outline-primary"
+                                                                data-bs-toggle="modal"
+                                                                t-attf-data-bs-target="#complaintModal{{complaint.id}}">
+                                                                <i class="fa fa-eye"></i> View
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Complaint Detail Modal -->
+                                                    <div class="modal fade"
+                                                        t-attf-id="complaintModal{{complaint.id}}"
+                                                        tabindex="-1" aria-hidden="true">
+                                                        <div class="modal-dialog modal-lg">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">Complaint Details</h5>
+                                                                    <button type="button" class="btn-close"
+                                                                        data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="row g-3">
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Code</label>
+                                                                            <p class="fw-bold" t-esc="complaint.code or '-'" />
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Type</label>
+                                                                            <p class="fw-bold" t-esc="complaint.type_id.name or '-'" />
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Status</label>
+                                                                            <p>
+                                                                                <span t-attf-class="badge bg-{{
+                                                                                    'success' if complaint.state == 'solved' else
+                                                                                    'primary' if complaint.state == 'in_progress' else
+                                                                                    'warning' if complaint.state == 'submit' else
+                                                                                    'danger' if complaint.state == 'cancel' else
+                                                                                    'info'
+                                                                                }}">
+                                                                                    <t t-esc="complaint.state.replace('_', ' ').title()" />
+                                                                                </span>
+                                                                            </p>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="text-muted small">Priority</label>
+                                                                            <p class="fw-bold" t-esc="(complaint.priority or '').title() or '-'" />
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="text-muted small">Subject</label>
+                                                                            <p class="fw-bold" t-esc="complaint.name or '-'" />
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="text-muted small">Student</label>
+                                                                            <p class="fw-bold">
+                                                                                <t t-if="complaint.student_id">
+                                                                                    <t t-esc="complaint.student_id.name" />
+                                                                                    <t t-if="complaint.student_id.student_id_string">
+                                                                                        <span class="text-muted ms-1"
+                                                                                            t-esc="' [' + complaint.student_id.student_id_string + ']'" />
+                                                                                    </t>
+                                                                                </t>
+                                                                                <t t-else="">-</t>
+                                                                            </p>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="text-muted small">Program</label>
+                                                                            <p class="fw-bold" t-esc="complaint.program_line_id.program_id.name or '-'" />
+                                                                        </div>
+                                                                        <t t-if="complaint.note">
+                                                                            <div class="col-12">
+                                                                                <label class="text-muted small">Description</label>
+                                                                                <p t-esc="complaint.note" />
+                                                                            </div>
+                                                                        </t>
+                                                                        <t t-if="complaint.feedback">
+                                                                            <div class="col-12">
+                                                                                <label class="text-muted small">Admin Feedback</label>
+                                                                                <div class="alert alert-info">
+                                                                                    <t t-esc="complaint.feedback" />
+                                                                                </div>
+                                                                            </div>
+                                                                        </t>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="text-center py-5">
+                                        <i class="fa fa-inbox fa-4x text-muted mb-3"></i>
+                                        <h5 class="text-muted">No Complaints Found</h5>
+                                        <p class="text-muted">You haven't submitted any complaints yet.</p>
+                                        <button type="button" class="btn btn-primary mt-2"
+                                            data-bs-toggle="modal" data-bs-target="#createComplaintModal">
+                                            <i class="fa fa-plus-circle me-2"></i>Create First Complaint
+                                        </button>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Complaint Modal -->
+            <div class="modal fade" id="createComplaintModal" tabindex="-1"
+                aria-labelledby="createComplaintModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-sm-down">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createComplaintModalLabel">Create New Complaint</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <form action="/my/complaint/create" method="POST" class="needs-validation">
+                            <div class="modal-body overflow-auto" style="max-height: calc(100vh - 200px);">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+
+                                <div class="row g-3">
+                                    <!-- Subject -->
+                                    <div class="col-12">
+                                        <label class="form-label">Subject <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="subject"
+                                            required="required" placeholder="Enter complaint subject" />
+                                    </div>
+
+                                    <!-- Complaint Type -->
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Complaint Type <span class="text-danger">*</span></label>
+                                        <select class="form-select" name="type_id" required="required">
+                                            <option value="">-- Select Type --</option>
+                                            <t t-foreach="request.env['dsl.study.complain.type'].sudo().search([])" t-as="ctype">
+                                                <option t-att-value="ctype.id" t-esc="ctype.name" />
+                                            </t>
+                                        </select>
+                                    </div>
+
+                                    <!-- Student -->
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Student</label>
+                                        <select class="form-select" name="student_id" id="agentComplaintStudentSelect">
+                                            <option value="">-- Select Student (Optional) --</option>
+                                            <t t-foreach="agent_students" t-as="st">
+                                                <option t-att-value="st.id">
+                                                    <t t-esc="st.name" />
+                                                    <t t-if="st.student_id_string">
+                                                        <t t-esc="' [' + st.student_id_string + ']'" />
+                                                    </t>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+
+                                    <!-- Country (populated dynamically based on student) -->
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Country</label>
+                                        <select class="form-select" name="country_id" id="agentComplaintCountrySelect">
+                                            <option value="">-- Select a student first --</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Related Program (populated dynamically) -->
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Related Program</label>
+                                        <select class="form-select" name="program_line_id" id="agentComplaintProgramSelect">
+                                            <option value="">-- Select a student first --</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="col-12">
+                                        <label class="form-label">Description <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" name="description" rows="5"
+                                            required="required" placeholder="Describe your complaint in detail"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-paper-plane me-2"></i>Submit Complaint
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JS: Populate country and program dropdowns when student is selected -->
+            <script type="text/javascript">
+                (function () {
+                    var studentSelect = document.getElementById('agentComplaintStudentSelect');
+                    var programSelect = document.getElementById('agentComplaintProgramSelect');
+                    var countrySelect = document.getElementById('agentComplaintCountrySelect');
+                    if (!studentSelect) return;
+
+                    studentSelect.addEventListener('change', function () {
+                        var studentId = this.value;
+
+                        // Reset both dropdowns
+                        if (programSelect) programSelect.innerHTML = '<option value="">-- Loading... --</option>';
+                        if (countrySelect) countrySelect.innerHTML = '<option value="">-- Loading... --</option>';
+
+                        if (!studentId) {
+                            if (programSelect) programSelect.innerHTML = '<option value="">-- Select a student first --</option>';
+                            if (countrySelect) countrySelect.innerHTML = '<option value="">-- Select a student first --</option>';
+                            return;
+                        }
+
+                        // Fetch programs
+                        if (programSelect) {
+                            fetch('/my/complaint/student_programs/' + studentId)
+                                .then(function (res) { return res.json(); })
+                                .then(function (data) {
+                                    programSelect.innerHTML = '<option value="">-- Select Program (Optional) --</option>';
+                                    if (data.programs &amp;&amp; data.programs.length > 0) {
+                                        data.programs.forEach(function (p) {
+                                            var opt = document.createElement('option');
+                                            opt.value = p.id;
+                                            opt.textContent = p.name;
+                                            programSelect.appendChild(opt);
+                                        });
+                                    } else {
+                                        programSelect.innerHTML = '<option value="">-- No programs found --</option>';
+                                    }
+                                })
+                                .catch(function () {
+                                    programSelect.innerHTML = '<option value="">-- Error loading programs --</option>';
+                                });
+                        }
+
+                        // Fetch countries from this student's programs
+                        if (countrySelect) {
+                            fetch('/my/complaint/student_countries/' + studentId)
+                                .then(function (res) { return res.json(); })
+                                .then(function (data) {
+                                    countrySelect.innerHTML = '<option value="">-- Select Country (Optional) --</option>';
+                                    if (data.countries &amp;&amp; data.countries.length > 0) {
+                                        data.countries.forEach(function (c) {
+                                            var opt = document.createElement('option');
+                                            opt.value = c.id;
+                                            opt.textContent = c.name;
+                                            countrySelect.appendChild(opt);
+                                        });
+                                    } else {
+                                        countrySelect.innerHTML = '<option value="">-- No countries found --</option>';
+                                    }
+                                })
+                                .catch(function () {
+                                    countrySelect.innerHTML = '<option value="">-- Error loading countries --</option>';
+                                });
+                        }
+                    });
+                })();
+            </script>
+
+        </t>
+    </template>
+</odoo>

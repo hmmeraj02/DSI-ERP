@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="student_communication" name="Student Communication">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'communication'" />
+            <div class="container-fluid">
+                <div class="row">
+                    <!-- Left Sidebar - Profile Card -->
+                    <t t-call="dsl_student_portal.student_sidebar"/>
+                    <!-- <div class="col-lg-3 col-md-4 col-12 mb-4">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                Profile Image
+                                <div class="text-center mb-3">
+                                    <t t-if="student.photo">
+                                        <img
+                                            t-attf-src="data:image/png;base64,{{student.photo.decode('utf-8')}}"
+                                            class="rounded-circle"
+                                            style="width:100px;height:100px;object-fit:cover;border:3px solid #f0f0f0;"
+                                            alt="Profile" />
+                                    </t>
+                                    <t t-else="">
+                                        <img
+                                            src="https://upload.wikimedia.org/wikipedia/commons/9/9e/Male_Avatar.jpg"
+                                            class="rounded-circle"
+                                            style="width:100px;height:100px;object-fit:cover;"
+                                            alt="Avatar" />
+                                    </t>
+                                </div>
+
+                                Profile Info
+                                <div class="text-center mb-3">
+                                    <h5 class="mb-1 text-capitalize" t-esc="student.name" />
+                                    <p class="small text-muted mb-1" t-if="student.mobile">
+                                        <i class="fa fa-phone me-1"></i>
+                                        <t t-esc="student.mobile" />
+                                    </p>
+                                    <p class="small text-muted mb-1" t-if="student.email">
+                                        <i class="fa fa-envelope me-1"></i>
+                                        <t t-esc="student.email" />
+                                    </p>
+                                    <p class="small text-muted mb-0"
+                                        t-if="student.student_id_string">
+                                        <span>Student id:</span>
+                                        <t t-esc="student.student_id_string" />
+                                    </p>
+                                </div>
+
+                                <hr />
+
+                                Menu
+                                <div class="list-group list-group-flush">
+                                    <a href="/my/home"
+                                        class="list-group-item list-group-item-action border-0">
+                                        <i class="fa fa-home me-2"></i>Dashboard </a>
+                                    <a href="/my/communication"
+                                        class="list-group-item list-group-item-action active border-0">
+                                        <i class="fa fa-comments me-2"></i>Communication </a>
+                                    <a href="/my/programs"
+                                        class="list-group-item list-group-item-action border-0">
+                                        <i class="fa fa-book me-2"></i>Programs </a>
+                                    <a href="/my/invoices"
+                                        class="list-group-item list-group-item-action border-0">
+                                        <i class="fa fa-file-text me-2"></i>Invoices </a>
+                                    <a href="/my/complaints"
+                                        class="list-group-item list-group-item-action border-0">
+                                        <i class="fa fa-exclamation-circle me-2"></i>Complaints </a>
+                                    <a href="/my/profile"
+                                        class="list-group-item list-group-item-action border-0">
+                                        <i class="fa fa-user me-2"></i>My Profile </a>
+                                    <a href="/my/documents"
+                                        class="list-group-item list-group-item-action border-0">
+                                        <i class="fa fa-folder-open me-2"></i>Documents </a>
+                                    <a href="/my/security"
+                                        class="list-group-item list-group-item-action border-0">
+                                        <i class="fa fa-lock me-2"></i>Security </a>
+                                    <a href="/web/session/logout"
+                                        class="list-group-item list-group-item-action border-0 text-danger">
+                                        <i class="fa fa-sign-out me-2"></i>Logout </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+
+                    <!-- Main Content Area - Communication -->
+                    <div class="col-lg-9 col-md-8 col-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-comments fa-2x text-primary me-3"></i>
+                                    <h4 class="mb-0">Discussion &amp; Communication</h4>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mt-4">
+                                    <h6 class="mb-3">Discussion</h6>
+                                    <t t-call="portal.message_thread">
+                                        <t t-set="object" t-value="student"/>
+                                        <t t-set="token" t-value="student.access_token"/>
+                                        <t t-set="pid" t-value="request.env.user.partner_id.id"/>
+                                        <t t-set="hash" t-value="student._sign_token(request.env.user.partner_id.id)"/>
+                                        <t t-set="enable_composer" t-value="True"/>
+                                        <t t-set="allow_composer" t-value="True"/>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

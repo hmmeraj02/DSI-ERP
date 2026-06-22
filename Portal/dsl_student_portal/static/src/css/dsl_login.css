@@ -1,0 +1,325 @@
+/* =========================================================================
+   Dream Study International — Login page
+   Design tokens (single source of truth) — recolor everything from here.
+   Palette sampled from login_design/assets/login_desktop_full.png.
+   ========================================================================= */
+:root {
+    --ds-page-bg:        #d4effd;          /* watercolor light blue            */
+    --ds-page-bg-2:      #eaf6fe;
+
+    /* Center column: diagonal gradient, cyan (top-left) -> deep blue (bottom) */
+    --ds-panel-top:      #1ca4cd;
+    --ds-panel-mid:      #1f8abe;
+    --ds-panel-bottom:   #26549e;
+    /* tracks the design's ~32% column on every monitor: 600px on FHD+,
+       ~470px on a 1440px laptop, floor of 430px so forms never cramp */
+    --ds-panel-w:        clamp(430px, 33vw, 600px);
+
+    /* Darker logo band at the top of the column + its divider line           */
+    --ds-panel-header:   linear-gradient(90deg, rgba(10, 44, 96, 0.08), rgba(10, 44, 96, 0.20));
+    --ds-divider:        #2557a1;
+
+    --ds-panel-text:     #ffffff;
+    --ds-panel-muted:    rgba(255, 255, 255, 0.85);
+    --ds-accent:         #ffb000;          /* "Portal" highlight (sampled)     */
+
+    --ds-btn-bg:         #ffffff;          /* chooser buttons                  */
+    --ds-btn-text:       #0d1b33;          /* near-black navy (mockup ~black)  */
+
+    --ds-stat-bg:        #2d6fcb;          /* stat tiles (sampled solid blue)  */
+    --ds-stat-border:    rgba(255, 255, 255, 0.40);
+
+    --ds-radius:         14px;
+    --ds-radius-sm:      10px;
+}
+
+/* ---- Full-screen stage ---------------------------------------------------
+   One full-bleed backdrop image: the design's complete watercolor background
+   (journey art on both sides, empty sky in the middle where the panel sits).
+   Stretched 100%/100%: browser viewports are usually wider than the image's
+   16:9, and `cover` would crop the right-side art (it runs to the very top
+   and bottom edges). A mild stretch is invisible on watercolor artwork,
+   while cropping visibly cuts the paper plane / step labels. */
+.ds-login-root {
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;          /* panel column always spans full height   */
+    background:
+        url("/dsl_student_portal/static/src/img/journey_bg.jpg") center / 100% 100% no-repeat,
+        radial-gradient(circle at 50% 0%, var(--ds-page-bg-2), var(--ds-page-bg));
+}
+
+/* ---- Center column: full-height, edge-to-edge (no card, no shadow) ------ */
+.ds-panel {
+    position: relative;
+    z-index: 1;
+    width: var(--ds-panel-w);
+    max-width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg,
+        var(--ds-panel-top) 0%,
+        var(--ds-panel-mid) 48%,
+        var(--ds-panel-bottom) 100%);
+    color: var(--ds-panel-text);
+    animation: ds-fade-in 0.5s ease both;
+}
+@keyframes ds-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ---- Darker logo header band (full column width) ------------------------ */
+.ds-panel-logo {
+    flex: 0 0 auto;
+    text-align: center;
+    padding: 30px 24px 26px;
+    background: var(--ds-panel-header);
+    border-bottom: 3px solid var(--ds-divider);
+}
+.ds-panel-logo img { width: auto; max-width: 64%; max-height: 60px; }
+
+/* ---- Body: vertically centers chooser / form between header & footer ---- */
+.ds-panel-body {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 30px 38px;
+}
+
+/* ---- Headings ---------------------------------------------------------- */
+.ds-title {
+    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--ds-panel-text);
+}
+.ds-title .ds-accent { color: var(--ds-accent); }
+.ds-subtitle {
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--ds-panel-muted);
+    margin: 0 auto 26px;
+    max-width: 92%;
+}
+
+/* ---- Designation chooser buttons (2x2, plain white, uppercase) ---------- */
+.ds-choose {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+.ds-choose .btn.ds-choose-btn {
+    display: block;
+    width: 100%;
+    background: var(--ds-btn-bg);
+    color: var(--ds-btn-text);
+    border: none;
+    border-radius: var(--ds-radius-sm);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none;
+    padding: 12px 10px;
+    box-shadow: 0 4px 10px -6px rgba(9, 38, 84, 0.5);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    white-space: nowrap;
+}
+.ds-choose .btn.ds-choose-btn:hover,
+.ds-choose .btn.ds-choose-btn:focus {
+    background: var(--ds-btn-bg);
+    color: var(--ds-btn-text);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 18px -8px rgba(9, 38, 84, 0.55);
+}
+
+/* ---- Country cards (3x2 grid of pre-rendered images) -------------------- */
+.ds-countries {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 26px;
+}
+.ds-countries img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+}
+.ds-countries img:hover { transform: translateY(-3px) scale(1.02); }
+
+/* ---- Stat tiles: translucent-looking blue, white numbers ---------------- */
+.ds-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.ds-stat {
+    text-align: center;
+    background: var(--ds-stat-bg);
+    border: 1px solid var(--ds-stat-border);
+    border-radius: var(--ds-radius);
+    padding: 14px 6px;
+}
+.ds-stat .ds-stat-num {
+    display: block;
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ds-panel-text);
+}
+.ds-stat .ds-stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--ds-panel-text);
+    opacity: 0.95;
+    margin-top: 3px;
+}
+
+/* ---- Login forms (inside the same column) ------------------------------- */
+.ds-form .form-label { color: var(--ds-panel-text); font-weight: 600; font-size: 0.85rem; }
+.ds-form .form-control {
+    border: none;
+    border-radius: var(--ds-radius-sm);
+    padding: 11px 14px;
+}
+.ds-form .form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.35);
+}
+.ds-form .input-group .form-control { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.ds-form .input-group-text {
+    background: #fff;
+    border: none;
+    border-top-right-radius: var(--ds-radius-sm);
+    border-bottom-right-radius: var(--ds-radius-sm);
+    color: var(--ds-btn-text);
+}
+.ds-form .btn.ds-submit {
+    width: 100%;
+    background: var(--ds-accent);
+    color: var(--ds-btn-text);
+    border: none;
+    border-radius: var(--ds-radius-sm);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 12px;
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+.ds-form .btn.ds-submit:hover { transform: translateY(-2px); filter: brightness(1.05); }
+
+.ds-links { text-align: center; margin-top: 16px; font-size: 0.9rem; }
+.ds-links a { color: var(--ds-panel-text); text-decoration: none; }
+.ds-links a:hover { color: var(--ds-accent); text-decoration: underline; }
+.ds-links .ds-sep { opacity: 0.5; margin: 0 8px; }
+
+/* ---- Footer (bottom of the column) -------------------------------------- */
+.ds-panel-footer {
+    flex: 0 0 auto;
+    text-align: center;
+    font-size: 0.78rem;
+    padding: 14px 24px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--ds-panel-muted);
+}
+.ds-panel-footer a { color: var(--ds-panel-muted); text-decoration: none; }
+.ds-panel-footer a:hover { color: var(--ds-accent); }
+
+/* ---- Alerts keep good contrast on the blue panel ----------------------- */
+.ds-panel .alert { border: none; border-radius: var(--ds-radius-sm); }
+
+/* ---- No-scroll center column (desktop) -----------------------------------
+   The column is locked to the viewport height; the height media queries
+   below compress spacing/typography on shorter screens so the content
+   always fits instead of scrolling. Mobile (<=1100px) keeps scrolling.    */
+@media (min-width: 1101px) {
+    .ds-login-root { overflow: hidden; }
+    .ds-panel { height: 100%; min-height: 0; }
+    .ds-panel-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        padding-top: 16px;
+        padding-bottom: 16px;
+    }
+}
+/* Laptop-width monitors: the column is ~430-500px wide, so scale the
+   type/spacing down with it to keep the design's proportions. */
+@media (min-width: 1101px) and (max-width: 1500px) {
+    .ds-panel-logo img { max-height: 46px; max-width: 58%; }
+    .ds-panel-body { padding-left: 28px; padding-right: 28px; }
+    .ds-title { font-size: 1.4rem; }
+    .ds-subtitle { font-size: 0.82rem; max-width: 96%; }
+    .ds-choose { gap: 10px; margin-bottom: 20px; }
+    .ds-choose .btn.ds-choose-btn { font-size: 0.85rem; padding: 10px 8px; }
+    .ds-countries { gap: 10px; margin-bottom: 18px; }
+    .ds-stats { gap: 10px; }
+    .ds-stat .ds-stat-num { font-size: 1.15rem; }
+    .ds-stat .ds-stat-label { font-size: 0.68rem; }
+    .ds-panel-footer { font-size: 0.72rem; }
+}
+
+@media (min-width: 1101px) and (max-height: 880px) {
+    .ds-panel-logo { padding: 16px 24px 14px; }
+    .ds-panel-logo img { max-height: 46px; }
+    .ds-title { font-size: 1.45rem; margin-bottom: 6px; }
+    .ds-subtitle { font-size: 0.84rem; margin-bottom: 16px; }
+    .ds-choose { gap: 10px; margin-bottom: 18px; }
+    .ds-choose .btn.ds-choose-btn { padding: 10px 8px; font-size: 0.88rem; }
+    .ds-countries { gap: 10px; margin-bottom: 16px; }
+    .ds-stat { padding: 9px 4px; }
+    .ds-stat .ds-stat-num { font-size: 1.2rem; }
+    .ds-stat .ds-stat-label { font-size: 0.7rem; }
+    .ds-panel-footer { font-size: 0.72rem; padding: 9px 24px 11px; }
+}
+@media (min-width: 1101px) and (max-height: 740px) {
+    .ds-panel-logo { padding: 12px 24px 10px; }
+    .ds-panel-logo img { max-height: 38px; }
+    .ds-subtitle { margin-bottom: 12px; }
+    .ds-choose { margin-bottom: 14px; }
+    .ds-countries {
+        gap: 8px;
+        margin-bottom: 12px;
+        max-width: 84%;            /* shrink the cards: tallest block wins back the most height */
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .ds-stat { padding: 7px 4px; }
+}
+
+/* ---- Responsive ---------------------------------------------------------
+   Phone mockup (login_phone_full.png): column goes full-bleed, journey
+   illustrations disappear, chooser STAYS 2x2 and stats stay 3-across.      */
+@media (max-width: 1100px) {
+    /* drop the journey backdrop: the panel covers most of it anyway */
+    .ds-login-root {
+        background: radial-gradient(circle at 50% 0%, var(--ds-page-bg-2), var(--ds-page-bg));
+    }
+    :root { --ds-panel-w: min(600px, 100%); }
+}
+@media (max-width: 640px) {
+    :root { --ds-panel-w: 100%; }
+    .ds-panel-logo { padding: 22px 18px 18px; }
+    .ds-panel-logo img { max-width: 72%; max-height: 52px; }
+    .ds-panel-body { padding: 24px 18px; }
+    .ds-title { font-size: 1.4rem; }
+    .ds-subtitle { font-size: 0.82rem; margin-bottom: 20px; }
+    .ds-choose { gap: 10px; margin-bottom: 22px; }
+    .ds-choose .btn.ds-choose-btn { font-size: 0.85rem; padding: 11px 6px; }
+    .ds-countries { gap: 8px; margin-bottom: 22px; }
+    .ds-stats { gap: 8px; }
+    .ds-stat { padding: 11px 4px; border-radius: var(--ds-radius-sm); }
+    .ds-stat .ds-stat-num { font-size: 1.15rem; }
+    .ds-stat .ds-stat-label { font-size: 0.65rem; }
+}

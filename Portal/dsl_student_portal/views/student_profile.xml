@@ -1,0 +1,1185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="student_profile" name="Student Profile">
+        <t t-call="portal.portal_layout">
+            <div class="container-fluid py-4">
+                <div class="row">
+                    <!-- Left Sidebar -->
+                    <t t-call="dsl_student_portal.student_sidebar" />
+                    <!-- Main Content -->
+                    <div class="col-lg-9 col-md-8 col-12">
+            <div class="container py-4" id="student_profile_container">
+                <!-- Success/Error Messages -->
+                <t t-if="success">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fa fa-check-circle me-2"></i>
+                        <t t-esc="success" />
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </t>
+                <t t-if="error">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fa fa-exclamation-circle me-2"></i>
+                        <t t-esc="error" />
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </t>
+
+                <!-- Page Header -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap">
+                            <div class="d-flex align-items-center mb-3 mb-md-0">
+                                <t t-if="student.photo">
+                                    <img
+                                        t-attf-src="data:image/png;base64,{{student.photo.decode('utf-8')}}"
+                                        class="rounded-circle me-3"
+                                        style="width:80px;height:80px;object-fit:cover;border:3px solid #f0f0f0;"
+                                        alt="Profile" />
+                                </t>
+                                <t t-else="">
+                                    <img
+                                        src="https://upload.wikimedia.org/wikipedia/commons/9/9e/Male_Avatar.jpg"
+                                        class="rounded-circle me-3"
+                                        style="width:80px;height:80px;object-fit:cover;"
+                                        alt="Avatar" />
+                                </t>
+                                <div>
+                                    <h4 class="mb-1 text-capitalize" t-esc="student.name" />
+                                    <p class="text-muted mb-1 small"
+                                        t-if="student.student_id_string"> Student ID: <t
+                                            t-esc="student.student_id_string" />
+                                    </p>
+                                    <p class="text-muted mb-0 small">
+                                        <i class="fa fa-envelope me-1"></i>
+                                        <t t-esc="student.email" />
+                                        <span class="mx-2">|</span>
+                                        <i class="fa fa-phone me-1"></i>
+                                        <t t-esc="student.mobile" />
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                <button id="btnEditProfile" class="btn btn-primary">
+                                    <i class="fa fa-pencil me-1"></i> Edit Profile </button>
+                                <div id="actionButtons" class="d-none">
+                                    <button type="submit" form="student_profile_form"
+                                        class="btn btn-success me-2">
+                                        <i class="fa fa-save me-1"></i> Save Changes </button>
+                                    <button id="btnCancelEdit" type="button"
+                                        class="btn btn-secondary">
+                                        <i class="fa fa-times me-1"></i> Cancel </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Form -->
+                <form id="student_profile_form" action="/my/profile/update" method="POST">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+
+                    <!-- Personal Information -->
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0"><i class="fa fa-id-card me-2 text-primary"></i>Personal
+                                Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">First Name <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control js-editable"
+                                        name="first_name"
+                                        t-att-value="student.first_name" required="required"
+                                        disabled="disabled" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Middle Name</label>
+                                    <input type="text" class="form-control js-editable"
+                                        name="middle_name"
+                                        t-att-value="student.middle_name or ''" disabled="disabled" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Last Name <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control js-editable"
+                                        name="last_name"
+                                        t-att-value="student.last_name" required="required"
+                                        disabled="disabled" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Date of Birth</label>
+                                    <input type="date" class="form-control js-editable"
+                                        name="date_of_birth"
+                                        t-att-value="student.date_of_birth" disabled="disabled" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Gender</label>
+                                    <select class="form-select js-editable" name="gender"
+                                        disabled="disabled">
+                                        <option value="">-- Select --</option>
+                                        <option value="male"
+                                            t-att-selected="'selected' if student.gender == 'male' else None">
+                                            Male</option>
+                                        <option value="female"
+                                            t-att-selected="'selected' if student.gender == 'female' else None">
+                                            Female</option>
+                                        <option value="other"
+                                            t-att-selected="'selected' if student.gender == 'other' else None">
+                                            Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Blood Group</label>
+                                    <select class="form-select js-editable" name="blood_group"
+                                        disabled="disabled">
+                                        <option value="">-- Select --</option>
+                                        <option value="a+"
+                                            t-att-selected="'selected' if student.blood_group == 'a+' else None">
+                                            A+</option>
+                                        <option value="a-"
+                                            t-att-selected="'selected' if student.blood_group == 'a-' else None">
+                                            A-</option>
+                                        <option value="b+"
+                                            t-att-selected="'selected' if student.blood_group == 'b+' else None">
+                                            B+</option>
+                                        <option value="b-"
+                                            t-att-selected="'selected' if student.blood_group == 'b-' else None">
+                                            B-</option>
+                                        <option value="ab+"
+                                            t-att-selected="'selected' if student.blood_group == 'ab+' else None">
+                                            AB+</option>
+                                        <option value="ab-"
+                                            t-att-selected="'selected' if student.blood_group == 'ab-' else None">
+                                            AB-</option>
+                                        <option value="o+"
+                                            t-att-selected="'selected' if student.blood_group == 'o+' else None">
+                                            O+</option>
+                                        <option value="o-"
+                                            t-att-selected="'selected' if student.blood_group == 'o-' else None">
+                                            O-</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Nationality</label>
+                                    <select class="form-select js-editable" name="nationality"
+                                        disabled="disabled">
+                                        <option value="">-- Select --</option>
+                                        <t t-foreach="countries" t-as="country">
+                                            <option t-att-value="country.id"
+                                                t-att-selected="'selected' if student.nationality and student.nationality.id == country.id else None"
+                                                t-esc="country.name" />
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0"><i class="fa fa-phone me-2 text-primary"></i>Contact
+                                Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Email <span
+                                            class="text-danger">*</span></label>
+                                    <input type="email" class="form-control js-editable"
+                                        name="email"
+                                        t-att-value="student.email" required="required"
+                                        disabled="disabled" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Mobile <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control js-editable"
+                                        name="mobile"
+                                        t-att-value="student.mobile" required="required"
+                                        disabled="disabled" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Facebook</label>
+                                    <input type="text" class="form-control js-editable" name="social_media_link"
+                                        t-att-value="student.social_media_link or ''" disabled="disabled" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Phone</label>
+                                    <input type="text" class="form-control js-editable" name="phone"
+                                        t-att-value="student.phone or ''" disabled="disabled" />
+                                </div>
+                                <!-- <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Fax</label>
+                                    <input type="text" class="form-control js-editable" name="fax"
+                                        t-att-value="student.fax or ''" disabled="disabled" />
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Officers Section (Admission + Document Officers) -->
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0"><i class="fa fa-users me-2 text-primary"></i>Assigned Admissions &amp; Documents Officers</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Admission Officers Section -->
+                            <t t-if="student.admission_officer_ids">
+                                <div class="mb-4">
+                                    <h6 class="fw-bold text-primary mb-3">
+                                        <i class="fa fa-user-tie me-2"></i>Admission Officer(s)
+                                    </h6>
+                                    <div class="row g-3">
+                                        <t t-foreach="student.admission_officer_ids" t-as="officer">
+                                            <div class="col-md-6">
+                                                <div class="card border mb-0" style="border-left: 4px solid #0d6efd !important;">
+                                                    <div class="card-body">
+                                                        <!-- Officer Header -->
+                                                        <div class="d-flex align-items-center mb-3">
+                                                            <div class="bg-light rounded-circle p-2 me-3" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                                                <i class="fa fa-user-circle fa-2x text-primary"></i>
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-0 fw-bold" t-esc="officer.name"/>
+                                                                <small class="text-muted">Admission Officer</small>
+                                                            </div>
+                                                            <t t-if="officer.id in on_leave_ids">
+                                                                <span class="badge bg-warning text-dark ms-auto">
+                                                                    <i class="fa fa-clock-o me-1"></i>On Leave
+                                                                </span>
+                                                            </t>
+                                                        </div>
+
+                                                        <!-- Contact Info -->
+                                                        <div class="bg-light p-3 rounded mb-3">
+                                                            <div class="mb-2">
+                                                                <small class="text-muted d-block"><i class="fa fa-envelope me-2"></i>Email</small>
+                                                                <t t-if="officer.partner_id.email">
+                                                                    <a t-att-href="'mailto:' + officer.partner_id.email" class="text-primary text-decoration-none fw-500">
+                                                                        <t t-esc="officer.partner_id.email"/>
+                                                                    </a>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="text-muted">Not available</span>
+                                                                </t>
+                                                            </div>
+                                                            <div>
+                                                                <small class="text-muted d-block"><i class="fa fa-phone me-2"></i>Phone</small>
+                                                                <t t-if="officer.partner_id.phone">
+                                                                    <a t-att-href="'tel:' + officer.partner_id.phone" class="text-primary text-decoration-none fw-500">
+                                                                        <t t-esc="officer.partner_id.phone"/>
+                                                                    </a>
+                                                                </t>
+                                                                <t t-elif="officer.partner_id.mobile">
+                                                                    <a t-att-href="'tel:' + officer.partner_id.mobile" class="text-primary text-decoration-none fw-500">
+                                                                        <t t-esc="officer.partner_id.mobile"/>
+                                                                    </a>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="text-muted">Not available</span>
+                                                                </t>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Action Button -->
+                                                        <a t-attf-href="/my/communication/student/#{student.id}" class="btn btn-primary w-100 btn-sm">
+                                                            <i class="fa fa-envelope me-2"></i>Send Message
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="mb-4">
+                                    <h6 class="fw-bold text-primary mb-3">
+                                        <i class="fa fa-user-tie me-2"></i>Admission Officer(s)
+                                    </h6>
+                                    <div class="text-center text-muted py-3">
+                                        <small>No admission officer assigned</small>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- Divider -->
+                            <hr class="my-4" />
+
+                            <!-- Document Officers Section -->
+                            <t t-if="student.document_officer_ids">
+                                <div>
+                                    <h6 class="fw-bold text-success mb-3">
+                                        <i class="fa fa-file-text me-2"></i>Document Officer(s)
+                                    </h6>
+                                    <div class="row g-3">
+                                        <t t-foreach="student.document_officer_ids" t-as="officer">
+                                            <div class="col-md-6">
+                                                <div class="card border mb-0" style="border-left: 4px solid #198754 !important;">
+                                                    <div class="card-body">
+                                                        <!-- Officer Header -->
+                                                        <div class="d-flex align-items-center mb-3">
+                                                            <div class="bg-light rounded-circle p-2 me-3" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                                                <i class="fa fa-user-circle fa-2x text-success"></i>
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-0 fw-bold" t-esc="officer.name"/>
+                                                                <small class="text-muted">Document Officer</small>
+                                                            </div>
+                                                            <t t-if="officer.id in on_leave_ids">
+                                                                <span class="badge bg-warning text-dark ms-auto">
+                                                                    <i class="fa fa-clock-o me-1"></i>On Leave
+                                                                </span>
+                                                            </t>
+                                                        </div>
+
+                                                        <!-- Contact Info -->
+                                                        <div class="bg-light p-3 rounded mb-3">
+                                                            <div class="mb-2">
+                                                                <small class="text-muted d-block"><i class="fa fa-envelope me-2"></i>Email</small>
+                                                                <t t-if="officer.partner_id.email">
+                                                                    <a t-att-href="'mailto:' + officer.partner_id.email" class="text-success text-decoration-none fw-500">
+                                                                        <t t-esc="officer.partner_id.email"/>
+                                                                    </a>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="text-muted">Not available</span>
+                                                                </t>
+                                                            </div>
+                                                            <div>
+                                                                <small class="text-muted d-block"><i class="fa fa-phone me-2"></i>Phone</small>
+                                                                <t t-if="officer.partner_id.phone">
+                                                                    <a t-att-href="'tel:' + officer.partner_id.phone" class="text-success text-decoration-none fw-500">
+                                                                        <t t-esc="officer.partner_id.phone"/>
+                                                                    </a>
+                                                                </t>
+                                                                <t t-elif="officer.partner_id.mobile">
+                                                                    <a t-att-href="'tel:' + officer.partner_id.mobile" class="text-success text-decoration-none fw-500">
+                                                                        <t t-esc="officer.partner_id.mobile"/>
+                                                                    </a>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="text-muted">Not available</span>
+                                                                </t>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Action Button -->
+                                                        <a t-attf-href="/my/communication/student/#{student.id}" class="btn btn-success w-100 btn-sm">
+                                                            <i class="fa fa-envelope me-2"></i>Send Message
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div>
+                                    <h6 class="fw-bold text-success mb-3">
+                                        <i class="fa fa-file-text me-2"></i>Document Officer(s)
+                                    </h6>
+                                    <div class="text-center text-muted py-3">
+                                        <small>No document officer assigned</small>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0"><i class="fa fa-map-marker me-2 text-primary"></i>Address
+                                Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Street</label>
+                                    <input type="text" class="form-control js-editable"
+                                        name="street"
+                                        t-att-value="student.street or ''" disabled="disabled" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Street 2</label>
+                                    <input type="text" class="form-control js-editable"
+                                        name="street2"
+                                        t-att-value="student.street2 or ''" disabled="disabled" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">City</label>
+                                    <input type="text" class="form-control js-editable" name="city"
+                                        t-att-value="student.city or ''" disabled="disabled" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">ZIP/Postal Code</label>
+                                    <input type="text" class="form-control js-editable" name="zip"
+                                        t-att-value="student.zip or ''" disabled="disabled" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">State</label>
+                                    <select class="form-select js-editable" name="state_id"
+                                        disabled="disabled">
+                                        <option value="">-- Select --</option>
+                                        <t t-foreach="states" t-as="state">
+                                            <option t-att-value="state.id"
+                                                t-att-selected="'selected' if student.state_id and student.state_id.id == state.id else None"
+                                                t-esc="state.name" />
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Country</label>
+                                    <select class="form-select js-editable" name="country_id"
+                                        disabled="disabled">
+                                        <option value="">-- Select --</option>
+                                        <t t-foreach="countries" t-as="country">
+                                            <option t-att-value="country.id"
+                                                t-att-selected="'selected' if student.country_id and student.country_id.id == country.id else None"
+                                                t-esc="country.name" />
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Passport Information -->
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0"><i class="fa fa-passport me-2 text-primary"></i>Passport
+                                Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Passport Number</label>
+                                    <input type="text" class="form-control js-editable"
+                                        name="passport_number"
+                                        t-att-value="student.passport_number or ''"
+                                        disabled="disabled" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Passport Expire Date</label>
+                                    <input type="date" class="form-control js-editable"
+                                        name="passport_expire_date"
+                                        t-att-value="student.passport_expire_date"
+                                        disabled="disabled" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Country of Residence</label>
+                                    <select class="form-select js-editable"
+                                        name="residence_country_id" disabled="disabled">
+                                        <option value="">-- Select --</option>
+                                        <t t-foreach="countries" t-as="country">
+                                            <option t-att-value="country.id"
+                                                t-att-selected="'selected' if student.residence_country_id and student.residence_country_id.id == country.id else None"
+                                                t-esc="country.name" />
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Education Section -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div
+                        class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fa fa-graduation-cap me-2 text-primary"></i>
+                            Education</h5>
+                        <button type="button"
+                            class="btn btn-sm btn-outline-primary js-edit-only d-none"
+                            data-bs-toggle="modal" data-bs-target="#addResultModal">
+                            <i class="fa fa-plus me-1"></i>Add Result </button>
+                    </div>
+                    <div class="card-body">
+                        <t t-if="student.result_ids">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Exam</th>
+                                            <th>Institution</th>
+                                            <th>Group / Program</th>
+                                            <th>Passing Year</th>
+                                            <th>Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="student.result_ids" t-as="r">
+                                            <tr>
+                                                <!-- Exam Type -->
+                                                <td>
+                                                    <span class="badge bg-primary"
+                                                        t-esc="(r.exam_type or '').upper()" />
+                                                </td>
+
+                                                <!-- Institution: Many2one — use .name -->
+                                                <td t-esc="r.institution_id.name or '-'" />
+
+                                                <!-- Group for school-level, Program name for university-level -->
+                                                <td>
+                                                    <t t-if="r.exam_type in ['ssc', 'hsc', 'o_level', 'a_level', 'dakhil', 'alim']">
+                                                        <t t-esc="(r.group or '').title() or '-'" />
+                                                    </t>
+                                                    <t t-else="">
+                                                        <t t-esc="r.program_id.name or '-'" />
+                                                    </t>
+                                                </td>
+
+                                                <!-- Passing Year -->
+                                                <td t-esc="r.passing_year or '-'" />
+
+                                                <!-- Score: Percentage for O/A-level, GPA for SSC/HSC/Dakhil/Alim, CGPA for university -->
+                                                <td>
+                                                    <t t-if="r.exam_type in ['o_level', 'a_level']">
+                                                        <t t-if="r.percentage">
+                                                            <strong><t t-esc="r.percentage" />%</strong>
+                                                        </t>
+                                                        <t t-else="">-</t>
+                                                    </t>
+                                                    <t t-elif="r.exam_type in ['ssc', 'hsc', 'dakhil', 'alim']">
+                                                        <t t-if="r.gpa">
+                                                            <strong>GPA <t t-esc="r.gpa" /></strong>
+                                                        </t>
+                                                        <t t-else="">-</t>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <t t-if="r.cgpa">
+                                                            <strong>CGPA <t t-esc="r.cgpa" /></strong>
+                                                        </t>
+                                                        <t t-else="">-</t>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="text-center text-muted py-4">
+                                <i class="fa fa-graduation-cap fa-3x mb-3 opacity-25"></i>
+                                <p>No education record yet. Click "Add Result" to add your education
+                                    details.</p>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Parents Section -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div
+                        class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fa fa-users me-2 text-primary"></i>Parents</h5>
+                        <button type="button"
+                            class="btn btn-sm btn-outline-primary js-edit-only d-none"
+                            data-bs-toggle="modal" data-bs-target="#addParentModal">
+                            <i class="fa fa-plus me-1"></i>Add Parent </button>
+                    </div>
+                    <div class="card-body">
+                        <t t-if="student.parent_ids">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Relation</th>
+                                            <th>Phone</th>
+                                            <th>Email</th>
+                                            <th>Occupation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="student.parent_ids" t-as="p">
+                                            <tr>
+                                                <td t-esc="p.name" />
+                                                <td>
+                                                    <span class="badge bg-info"
+                                                        t-esc="(p.relation or '').title()" />
+                                                </td>
+                                                <td t-esc="p.phone or p.mobile or '-'" />
+                                                <td t-esc="p.email or '-'" />
+                                                <td t-esc="p.occupation or '-'" />
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="text-center text-muted py-4">
+                                <i class="fa fa-users fa-3x mb-3 opacity-25"></i>
+                                <p>No parent added. Click "Add Parent" to add parent information.</p>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Sponsors Section -->
+                <!-- <div class="card shadow-sm border-0 mb-4">
+                    <div
+                        class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fa fa-handshake-o me-2 text-primary"></i>Sponsors</h5>
+                        <button type="button"
+                            class="btn btn-sm btn-outline-primary js-edit-only d-none"
+                            data-bs-toggle="modal" data-bs-target="#addSponsorModal">
+                            <i class="fa fa-plus me-1"></i>Add Sponsor </button>
+                    </div>
+                    <div class="card-body">
+                        <t t-if="student.sponsor_ids">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Relation</th>
+                                            <th>Phone</th>
+                                            <th>Email</th>
+                                            <th>Profession</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="student.sponsor_ids" t-as="s">
+                                            <tr>
+                                                <td t-esc="s.name" />
+                                                <td>
+                                                    <span class="badge bg-success"
+                                                        t-esc="(s.relationship_id.name or '').title()" />
+                                                </td>
+                                                <td t-esc="s.phone or s.mobile or '-'" />
+                                                <td t-esc="s.email or '-'" />
+                                                <td t-esc="s.profession_id.name or '-'" />
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="text-center text-muted py-4">
+                                <i class="fa fa-handshake-o fa-3x mb-3 opacity-25"></i>
+                                <p>No sponsor added. Click "Add Sponsor" to add sponsor information.</p>
+                            </div>
+                        </t>
+                    </div>
+                </div> -->
+
+            </div>
+
+            <!-- MODALS - Outside all forms -->
+
+            <!-- Education Modal -->
+            <div class="modal fade" id="addResultModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <form action="/my/education/create" method="POST" id="educationForm">
+                            <input type="hidden" name="csrf_token"
+                                t-att-value="request.csrf_token()" />
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fa fa-graduation-cap me-2"></i>Add
+                                    Education Result</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Exam Type <span
+                                                class="text-danger">*</span></label>
+                                        <select class="form-select" name="exam_type"
+                                            id="modalExamType" required="required">
+                                            <option value="">-- Select --</option>
+                                            <option value="ssc">SSC</option>
+                                            <option value="hsc">HSC</option>
+                                            <option value="dakhil">Dakhil</option>
+                                            <option value="alim">Alim</option>
+                                            <option value="o_level">O-level</option>
+                                            <option value="a_level">A-level</option>
+                                            <option value="diploma">Diploma</option>
+                                            <option value="bachelor">Bachelor</option>
+                                            <option value="masters">Masters</option>
+                                            <option value="others">Others</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Institution</label>
+                                        <select class="form-select" name="institution_id" id="modalInstitution">
+                                            <option value="">-- Select Institution --</option>
+                                            <t t-foreach="institutes" t-as="inst">
+                                                <option t-att-value="inst.id"
+                                                        t-att-data-for="inst.institute_for"
+                                                        t-esc="inst.name" />
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <!-- Group: SSC / HSC / Dakhil / Alim / O-level / A-level only -->
+                                    <div class="col-md-6" id="fieldGroup">
+                                        <label class="form-label fw-semibold">Group</label>
+                                        <select class="form-select" name="group">
+                                            <option value="">-- Select --</option>
+                                            <option value="science">Science</option>
+                                            <option value="commerce">Commerce</option>
+                                            <option value="arts">Arts</option>
+                                            <option value="general">General</option>
+                                        </select>
+                                    </div>
+                                    <!-- Program: Bachelor / Masters / Diploma / Others only -->
+                                    <div class="col-md-6 d-none" id="fieldProgram">
+                                        <label class="form-label fw-semibold">Program</label>
+                                        <select class="form-select" name="program_id" id="modalProgram">
+                                            <option value="">-- Select Program --</option>
+                                            <t t-foreach="programs" t-as="prog">
+                                                <option t-att-value="prog.id"
+                                                        t-att-data-type="prog.program_type"
+                                                        t-esc="prog.name" />
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Passing Year</label>
+                                        <input type="text" class="form-control" name="passing_year"
+                                            placeholder="e.g., 2024" />
+                                    </div>
+                                    <!-- GPA: SSC / HSC / Dakhil / Alim only -->
+                                    <div class="col-md-6 d-none" id="fieldGpa">
+                                        <label class="form-label fw-semibold">GPA</label>
+                                        <input type="number" step="0.01" min="0" max="5"
+                                            class="form-control" name="gpa"
+                                            placeholder="e.g., 5.00" />
+                                    </div>
+                                    <!-- Percentage: O-level / A-level only -->
+                                    <div class="col-md-6 d-none" id="fieldPercentage">
+                                        <label class="form-label fw-semibold">Percentage</label>
+                                        <div class="input-group">
+                                            <input type="number" step="0.01" min="0" max="100"
+                                                class="form-control" name="percentage"
+                                                placeholder="e.g., 85.50" />
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    <!-- CGPA: Bachelor / Masters / Diploma / Others only -->
+                                    <div class="col-md-6 d-none" id="fieldCgpa">
+                                        <label class="form-label fw-semibold">CGPA</label>
+                                        <input type="number" step="0.01" min="0" max="4"
+                                            class="form-control" name="cgpa"
+                                            placeholder="e.g., 3.40" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                    <i class="fa fa-times me-1"></i>Cancel </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-save me-1"></i>Save Education </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parent Modal -->
+            <div class="modal fade" id="addParentModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <form action="/my/parent/create" method="POST" id="parentForm">
+                            <input type="hidden" name="csrf_token"
+                                t-att-value="request.csrf_token()" />
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fa fa-users me-2"></i>Add Parent</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Name <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="name"
+                                            required="required" placeholder="Enter parent's name" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Relation <span
+                                                class="text-danger">*</span></label>
+                                        <select class="form-select" name="relation"
+                                            required="required">
+                                            <option value="">-- Select --</option>
+                                            <option value="father">Father</option>
+                                            <option value="mother">Mother</option>
+                                            <option value="sister">Sister</option>
+                                            <option value="brother">Brother</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Phone</label>
+                                        <input type="text" class="form-control" name="phone"
+                                            placeholder="Enter phone number" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Email</label>
+                                        <input type="email" class="form-control" name="email"
+                                            placeholder="Enter email address" />
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-semibold">Occupation</label>
+                                        <input type="text" class="form-control" name="occupation"
+                                            placeholder="Enter occupation" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                    <i class="fa fa-times me-1"></i>Cancel </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-save me-1"></i>Save Parent </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sponsor Modal -->
+            <div class="modal fade" id="addSponsorModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <form action="/my/sponsor/create" method="POST" id="sponsorForm">
+                            <input type="hidden" name="csrf_token"
+                                t-att-value="request.csrf_token()" />
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fa fa-handshake-o me-2"></i>Add
+                                    Sponsor</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Name <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="name"
+                                            required="required" placeholder="Enter sponsor's name" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Relation <span
+                                                class="text-danger">*</span></label>
+                                        <select class="form-select" name="relationship_id"
+                                            required="required">
+                                            <option value="">-- Select --</option>
+                                            <t t-foreach="relationships" t-as="rel">
+                                                <option t-att-value="rel.id" t-esc="rel.name" />
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Phone</label>
+                                        <input type="text" class="form-control" name="phone"
+                                            placeholder="Enter phone number" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Email</label>
+                                        <input type="email" class="form-control" name="email"
+                                            placeholder="Enter email address" />
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-semibold">Profession</label>
+                                        <select class="form-select" name="profession_id">
+                                            <option value="">-- Select --</option>
+                                            <t t-foreach="professions" t-as="prof">
+                                                <option t-att-value="prof.id" t-esc="prof.name" />
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                    <i class="fa fa-times me-1"></i>Cancel </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-save me-1"></i>Save Sponsor </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JavaScript for Edit Mode Toggle -->
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function() {
+                const container = document.getElementById('student_profile_container');
+                const form = document.getElementById('student_profile_form');
+                const editBtn = document.getElementById('btnEditProfile');
+                const cancelBtn = document.getElementById('btnCancelEdit');
+                const actionButtons = document.getElementById('actionButtons');
+
+                // Store original form values
+                let originalFormData = new FormData(form);
+
+                function setMode(mode) {
+                const fields = form.querySelectorAll('.js-editable');
+                const editOnlyButtons = document.querySelectorAll('.js-edit-only');
+
+                if (mode === 'edit') {
+                // Enable editing
+                fields.forEach(el => el.removeAttribute('disabled'));
+                editOnlyButtons.forEach(el => el.classList.remove('d-none'));
+                actionButtons.classList.remove('d-none');
+                editBtn.classList.add('d-none');
+
+                // Store current values
+                originalFormData = new FormData(form);
+                } else {
+                // Disable editing
+                fields.forEach(el => el.setAttribute('disabled', 'disabled'));
+                editOnlyButtons.forEach(el => el.classList.add('d-none'));
+                actionButtons.classList.add('d-none');
+                editBtn.classList.remove('d-none');
+
+                // Restore original values on cancel
+                if (mode === 'cancel') {
+                fields.forEach(el => {
+                const name = el.getAttribute('name');
+                const originalValue = originalFormData.get(name);
+                if (originalValue !== null) {
+                if (el.type === 'checkbox') {
+                el.checked = originalValue === 'on';
+                } else {
+                el.value = originalValue;
+                }
+                }
+                });
+                }
+                }
+                }
+
+                // Event listeners
+                editBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                setMode('edit');
+                });
+
+                cancelBtn.addEventListener('click', function() {
+                setMode('cancel');
+                });
+
+                // Form submission validation
+                form.addEventListener('submit', function(e) {
+                const requiredFields = form.querySelectorAll('[required]:not([disabled])');
+                let isValid = true;
+
+                requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+                } else {
+                field.classList.remove('is-invalid');
+                }
+                });
+
+                if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields');
+                }
+                });
+
+                // Initialize in view mode
+                setMode('view');
+
+                // Modal form handlers
+                const educationForm = document.getElementById('educationForm');
+                const parentForm = document.getElementById('parentForm');
+                const sponsorForm = document.getElementById('sponsorForm');
+
+                // Education form validation
+                <!-- if (educationForm) {
+                educationForm.addEventListener('submit', function(e) {
+                const examType = educationForm.querySelector('[name="exam_type"]');
+                if (!examType.value) {
+                e.preventDefault();
+                alert('Please select an Exam Type');
+                examType.focus();
+                return false;
+                }
+                });
+                } -->
+
+                // ── Education modal: toggle Group/GPA/Percentage vs Program/CGPA based on exam type ──
+                var SCHOOL_GPA_TYPES = ['ssc', 'hsc', 'dakhil', 'alim'];
+                var SCHOOL_PCT_TYPES = ['o_level', 'a_level'];
+                var SCHOOL_TYPES = SCHOOL_GPA_TYPES.concat(SCHOOL_PCT_TYPES);
+                var examTypeSelect = document.getElementById('modalExamType');
+
+                function toggleEducationFields() {
+                    var val = examTypeSelect.value;
+                    var isSchool = SCHOOL_TYPES.indexOf(val) !== -1;
+                    var isGpa = SCHOOL_GPA_TYPES.indexOf(val) !== -1;
+                    var isPct = SCHOOL_PCT_TYPES.indexOf(val) !== -1;
+
+                    // Show/hide field groups
+                    document.getElementById('fieldGroup').classList.toggle('d-none', !isSchool);
+                    document.getElementById('fieldProgram').classList.toggle('d-none', isSchool);
+                    document.getElementById('fieldGpa').classList.toggle('d-none', !isGpa);
+                    document.getElementById('fieldPercentage').classList.toggle('d-none', !isPct);
+                    document.getElementById('fieldCgpa').classList.toggle('d-none', isSchool);
+
+                    // Filter institution dropdown
+                    var instSelect = document.getElementById('modalInstitution');
+                    if (instSelect) {
+                        var targetFor = isSchool ? 'school_college' : 'university';
+                        Array.prototype.forEach.call(instSelect.options, function(opt) {
+                            if (!opt.value) return;
+                            var forAttr = opt.getAttribute('data-for');
+                            opt.hidden = forAttr &amp;&amp; forAttr !== targetFor;
+                        });
+                        instSelect.value = '';
+                    }
+
+                    // Filter program dropdown (university-level only)
+                    var progSelect = document.getElementById('modalProgram');
+                    if (progSelect) {
+                        var targetType = (val === 'bachelor') ? 'undergraduate'
+                                    : (val === 'masters')  ? 'postgraduate'
+                                    : (val === 'diploma' || val === 'others') ? 'diploma'
+                                    : null;
+                        Array.prototype.forEach.call(progSelect.options, function(opt) {
+                            if (!opt.value) return;
+                            var typeAttr = opt.getAttribute('data-type');
+                            opt.hidden = targetType ? (typeAttr !== targetType) : false;
+                        });
+                        progSelect.value = '';
+                    }
+                }
+
+                if (examTypeSelect) {
+                    examTypeSelect.addEventListener('change', toggleEducationFields);
+                    toggleEducationFields();
+                }
+
+                // Parent form validation
+                if (parentForm) {
+                parentForm.addEventListener('submit', function(e) {
+                const name = parentForm.querySelector('[name="name"]');
+                const relation = parentForm.querySelector('[name="relation"]');
+
+                if (!name.value.trim()) {
+                e.preventDefault();
+                alert('Please enter parent name');
+                name.focus();
+                return false;
+                }
+                if (!relation.value) {
+                e.preventDefault();
+                alert('Please select relation');
+                relation.focus();
+                return false;
+                }
+                });
+                }
+
+                // Sponsor form validation
+                if (sponsorForm) {
+                sponsorForm.addEventListener('submit', function(e) {
+                const name = sponsorForm.querySelector('[name="name"]');
+                const relation = sponsorForm.querySelector('[name="relationship_id"]');
+
+                if (!name.value.trim()) {
+                e.preventDefault();
+                alert('Please enter sponsor name');
+                name.focus();
+                return false;
+                }
+                if (!relation.value) {
+                e.preventDefault();
+                alert('Please select relation');
+                relation.focus();
+                return false;
+                }
+                });
+                }
+
+                // Reset forms when modals are closed
+                const modals = ['addResultModal', 'addParentModal', 'addSponsorModal'];
+                modals.forEach(modalId => {
+                const modalEl = document.getElementById(modalId);
+                if (modalEl) {
+                modalEl.addEventListener('hidden.bs.modal', function() {
+                const form = this.querySelector('form');
+                if (form) {
+                form.reset();
+                // Remove validation classes
+                form.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+                });
+                }
+                // Re-initialise education field visibility after reset
+                if (modalId === 'addResultModal' &amp;&amp; examTypeSelect) {
+                    toggleEducationFields();
+                }
+                });
+                }
+                });
+
+                // Auto-dismiss alerts after 5 seconds
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                setTimeout(() => {
+                alert.style.transition = 'opacity 0.3s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                alert.remove();
+                }, 300);
+                }, 5000);
+                });
+                });
+            </script>
+
+            <style>
+                .is-invalid {
+                border-color: #dc3545 !important;
+                }
+
+                .card {
+                transition: box-shadow 0.3s ease;
+                }
+
+                .card:hover {
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                }
+
+                .table-hover tbody tr:hover {
+                background-color: rgba(0, 123, 255, 0.05);
+                }
+
+                .badge {
+                font-weight: 500;
+                padding: 0.35em 0.65em;
+                }
+
+                .form-label.fw-semibold {
+                font-weight: 600;
+                color: #495057;
+                }
+
+                .modal-header {
+                background-color: #f8f9fa;
+                border-bottom: 2px solid #dee2e6;
+                }
+
+                .opacity-25 {
+                opacity: 0.25;
+                }
+            </style>
+                    </div> <!-- Close col-lg-9 -->
+                </div> <!-- Close row -->
+            </div> <!-- Close container-fluid -->
+        </t>
+    </template>
+</odoo>

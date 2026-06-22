@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="auth_signup_student" inherit_id="auth_signup.signup">
+        <xpath expr="//form[hasclass('oe_signup_form')]" position="replace">
+            <t t-if="request.params.get('type') == 'student'">
+                <section class="min-vh-100 d-flex align-items-center bg-light py-4">
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+                                <div class="card border-0 shadow-sm rounded-3">
+                                    <div class="card-body">
+                                        <div class="text-center mb-3">
+                                            <div
+                                                class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                                                style="width:60px;height:60px;">
+                                                <i class="fa fa-graduation-cap fa-lg"></i>
+                                            </div>
+                                            <h5 class="fw-bold text-primary mt-2 mb-1">Student
+                                                Registration</h5>
+                                            <p class="text-muted small mb-0">Create your student
+                                                account</p>
+                                        </div>
+
+                                        <t t-if="error">
+                                            <div class="alert alert-danger small py-2 mb-3"
+                                                role="alert">
+                                                <t t-esc="error" />
+                                            </div>
+                                        </t>
+
+                                        <form class="oe_signup_form" role="form" method="post">
+                                            <input type="hidden" name="csrf_token"
+                                                t-att-value="request.csrf_token()" />
+                                            <input type="hidden" name="redirect"
+                                                t-att-value="redirect" />
+                                            <input type="hidden" name="token" t-att-value="token" />
+
+                                            <div class="row">
+                                                <!-- First Name -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold mb-1">First
+                                                        Name <span class="text-danger">*</span></label>
+                                                    <input type="text" name="first_name"
+                                                        class="form-control form-control"
+                                                        placeholder="First name" required="required"
+                                                        t-att-value="first_name or ''" />
+                                                </div>
+
+                                                <!-- Last Name -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold mb-1">Last Name <span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="text" name="last_name"
+                                                        class="form-control form-control"
+                                                        placeholder="Last name" required="required"
+                                                        t-att-value="last_name or ''" />
+                                                </div>
+
+                                                <!-- Email -->
+                                                <div class="col-12">
+                                                    <label class="form-label fw-bold mb-1">Email
+                                                        Address <span class="text-danger">*</span></label>
+                                                    <input type="email" name="login"
+                                                        class="form-control form-control"
+                                                        placeholder="you@example.com"
+                                                        required="required"
+                                                        t-att-value="login or ''" />
+                                                </div>
+
+                                                <!-- Mobile -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold mb-1"> Mobile <span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="text" name="mobile"
+                                                        class="form-control form-control"
+                                                        placeholder="Mobile number"
+                                                        required="required"
+                                                        t-att-value="mobile or ''" />
+                                                </div>
+
+                                                <!-- DOB -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold mb-1">Date of
+                                                        Birth <span class="text-danger">*</span></label>
+                                                    <input type="date" name="date_of_birth"
+                                                        class="form-control form-control-sm"
+                                                        required="required"
+                                                        t-att-value="date_of_birth or ''" />
+                                                </div>
+
+                                                <!-- Gender -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-bold mb-1">
+                                                        Gender <span class="text-danger">*</span></label>
+                                                    <select name="gender"
+                                                        class="form-select form-select-sm"
+                                                        required="required">
+                                                        <option value="">-- Select --</option>
+                                                        <option value="male"
+                                                            t-att-selected="'selected' if gender == 'male' else None">
+                                                            Male</option>
+                                                        <option value="female"
+                                                            t-att-selected="'selected' if gender == 'female' else None">
+                                                            Female</option>
+                                                        <option value="other"
+                                                            t-att-selected="'selected' if gender == 'other' else None">
+                                                            Other</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Nationality -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-bold mb-1">
+                                                        Nationality</label>
+                                                    <select name="nationality"
+                                                        class="form-select form-select-sm">
+                                                        <option value="">-- Select --</option>
+                                                        <t
+                                                            t-foreach="request.env['res.country'].sudo().search([])"
+                                                            t-as="country">
+                                                            <option t-att-value="country.id"
+                                                                t-att-selected="'selected' if nationality and int(nationality) == country.id else None">
+                                                                <t t-esc="country.name" />
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Password -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-bold mb-1">
+                                                        Password <span class="text-danger">*</span></label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="password" name="password"
+                                                            class="form-control form-control-sm dsl-password-field"
+                                                            placeholder="Password" required="required"
+                                                            minlength="6" />
+                                                        <span class="input-group-text dsl-toggle-password" style="cursor: pointer;">
+                                                            <i class="fa fa-eye"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Confirm Password -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-bold mb-1">Confirm
+                                                        Password <span class="text-danger">*</span></label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="password" name="confirm_password"
+                                                            class="form-control form-control-sm dsl-password-field"
+                                                            placeholder="Confirm password"
+                                                            required="required" minlength="6" />
+                                                        <span class="input-group-text dsl-toggle-password" style="cursor: pointer;">
+                                                            <i class="fa fa-eye"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-grid mt-3">
+                                                <button type="submit"
+                                                    class="btn btn-primary fw-semibold">
+                                                    Register</button>
+                                            </div>
+
+                                            <hr class="my-3" />
+
+                                            <div class="text-center">
+                                                <p class="small text-muted mb-2">Already have an
+                                                    account?</p>
+                                                <a href="/web/login?type=student"
+                                                    class="btn btn-outline-primary btn-sm">Login as
+                                                    Student</a>
+                                            </div>
+
+                                            <div class="text-center mt-2">
+                                                <a href="/web/login"
+                                                    class="text-muted small text-decoration-none">
+                                                    <i class="fa fa-arrow-left me-1"></i> Back to
+                                                    Login </a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <script type="text/javascript">
+                    document.addEventListener('DOMContentLoaded', function() {
+                    const form = document.querySelector('.oe_signup_form');
+                    form.addEventListener('submit', function(e) {
+                    const password = form.querySelector('[name="password"]').value.trim();
+                    const confirmPassword =
+                    form.querySelector('[name="confirm_password"]').value.trim();
+                    if (password !== confirmPassword) {
+                    e.preventDefault();
+                    alert('Passwords do not match!');
+                    }
+                    });
+
+                    document.querySelectorAll('.dsl-toggle-password').forEach(function (toggle) {
+                    toggle.addEventListener('click', function () {
+                    var input = toggle.parentElement.querySelector('.dsl-password-field');
+                    var icon = toggle.querySelector('i');
+                    if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                    } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                    }
+                    });
+                    });
+                    });
+                </script>
+            </t>
+        </xpath>
+    </template>
+</odoo>
